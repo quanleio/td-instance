@@ -1,0 +1,45 @@
+import {
+  Raycaster,
+  Vector2,
+  Color,
+} from "https://unpkg.com/three@0.130.0/build/three.module.js";
+
+class Ray {
+  constructor(scene, camera) {
+    this.camera = camera;
+    this.scene = scene;
+    this.raycaster = new Raycaster();
+    this.mouse = new Vector2();
+
+    window.addEventListener("click", (ev) => {
+      this.mouse.x = (ev.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+
+      const intersects = this.raycaster.intersectObjects(this.scene.children);
+      this.setColor(intersects);
+    });
+  }
+
+  setColor(intersects) {
+    const color = new Color();
+    if (intersects.length > 0) {
+      const INTERSECTED = intersects[0].object;
+
+      switch (INTERSECTED.type) {
+        case "Mesh":
+          INTERSECTED.material.color.set( color.setHex(Math.random() * 0xffffff) );
+          break;
+        case "InstancedMesh":
+          const instanceId = intersects[0].instanceId;
+          intersects[0].object.setColorAt( instanceId, color.setHex(Math.random() * 0xffffff)
+          );
+          intersects[0].object.instanceColor.needsUpdate = true;
+          break;
+      }
+    }
+  }
+}
+
+export { Ray };
