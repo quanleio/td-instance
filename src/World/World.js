@@ -19,6 +19,8 @@ class World {
     camera = createCamera();
     scene = createScene();
     renderer = createRenderer();
+
+    // loop
     loop = new Loop(camera, scene, renderer);
 
     const hemiLight = createHemiLight();
@@ -30,10 +32,12 @@ class World {
     // cube
     const cube = createCube();
     scene.add(cube);
+    loop.updatables.push(cube);
 
     // model
     addModel().then(_model => {
       scene.add(_model);
+      loop.updatables.push(_model);
     });
 
     // control
