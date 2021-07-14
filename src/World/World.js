@@ -1,7 +1,6 @@
-import {Raycaster, Vector2, Color} from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
-import {addModel} from './components/model.js';
+import {loadSakura, loadSuzanne} from './components/model.js';
 import {createDirLight, createHemiLight} from './components/lights.js';
 import {createRenderer} from './systems/renderer.js';
 import {createControl} from './systems/controls.js';
@@ -24,10 +23,8 @@ class World {
     loop = new Loop(camera, scene, renderer);
 
     const hemiLight = createHemiLight();
-    scene.add(hemiLight);
-
     const dirLight = createDirLight();
-    scene.add(dirLight);
+    scene.add(dirLight, hemiLight);
 
     // cube
     const cube = createCube();
@@ -35,10 +32,14 @@ class World {
     loop.updatables.push(cube);
 
     // model
-    addModel().then(_model => {
+    loadSuzanne().then(_model => {
       scene.add(_model);
       loop.updatables.push(_model);
     });
+
+    loadSakura().then(_model => {
+      scene.add(_model);
+    })
 
     // control
     controls = createControl(camera, renderer);
