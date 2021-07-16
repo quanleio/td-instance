@@ -127,12 +127,13 @@ class Geometries {
   }
 
   createParticles() {
-    const particleCount = 10000;
-    const radius = 200;
+    const particleCount = 100;
+    const radius = 10;
     const positions = [];
     const colors = [];
     const sizes = [];
     const color = new Color();
+    const matrix = new Matrix4();
 
     let uniforms = {
       pointTexture: { value: new TextureLoader().load( "assets/spark1.png" ) }
@@ -148,7 +149,7 @@ class Geometries {
       vertexColors: true
     } );
 
-    let geometry = new BufferGeometry();
+    /*let geometry = new BufferGeometry();
     for ( let i = 0; i < particleCount; i ++ ) {
 
       positions.push( ( Math.random() * 2 - 1 ) * radius );
@@ -159,16 +160,34 @@ class Geometries {
       colors.push( color.r, color.g, color.b );
       sizes.push( 200 );
     }
-    console.error(points);
+
+    geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );*/
+
+    const geometry = new BufferGeometry();
+    for ( let i = 0; i < particleCount; i ++ ) {
+
+      const randomX = ( Math.random() * 2 - 1 ) * radius;
+      const randomY = ( Math.random() * 2 - 1 ) * radius;
+      const randomZ = ( Math.random() * 2 - 1 ) * radius;
+
+      positions.push( randomX );
+      positions.push( randomY );
+      positions.push( randomZ );
+
+      points.push(new Vector3(randomX, randomY, randomZ));
+
+      color.setHSL( i / particleCount, 1.0, 0.5 );
+      colors.push( color.r, color.g, color.b );
+      sizes.push( 200 );
+    }
 
     geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
     geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
     geometry.setAttribute( 'size', new Float32BufferAttribute( sizes, 1 ).setUsage( DynamicDrawUsage ) );
     let particleSystem = new Points( geometry, shaderMaterial );
-    // particleSystem.type = 'InstancedMesh';
     particleSystem.sortParticles = true;
 
-    console.error(geometry)
+    console.error(particleSystem)
 
     particleSystem.tick = (delta) => {
       const time = Date.now() * 0.005;
@@ -183,8 +202,6 @@ class Geometries {
       // var particle = geometry.vertices[particleCount];
       // particle.y = Math.random() * 500 - 250;
       // particleSystem.geometry.vertices.needsUpdate = true;
-
-
     }
 
     return particleSystem;
@@ -226,32 +243,26 @@ class Geometries {
       vec.setFromMatrixPosition( identity );
       points.push(vec);
 
-      // var translation = new THREE.Vector3(),
-      //     rotation = new THREE.Quaternion(),
-      //     scale = new THREE.Vector3();
-      // mat.decompose(translation, rotation, scale);
-
       boxes.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
     }
 
     boxes.tick = (delta) => {
 
-      const time = Date.now() * 0.001;
-      let i = 0;
+      /*const time = Date.now() * 0.001;
       const offset = ( amount - 1 ) / 2;
 
       for ( let x = 0; x < amount; x ++ ) {
         for ( let y = 0; y < amount; y ++ ) {
           for ( let z = 0; z < amount; z ++ ) {
-            // dummy.position.set( offset - x, offset - y, offset - z );
+            dummy.position.set( offset - x, offset - y, offset - z );
             dummy.rotation.y = ( Math.sin( x / 4 + time ) + Math.sin( y / 4 + time ) + Math.sin( z / 4 + time ) );
             dummy.rotation.z = dummy.rotation.y * 2;
             dummy.updateMatrix();
-            // boxes.setMatrixAt( i ++, dummy.matrix );
+            boxes.setMatrixAt( i ++, dummy.matrix );
           }
         }
       }
-      boxes.instanceMatrix.needsUpdate = true;
+      boxes.instanceMatrix.needsUpdate = true;*/
     }
 
     return boxes;
@@ -289,7 +300,7 @@ class Geometries {
     return cubes;
   }
 
-  createCube() {
+  /*createCube() {
     const geometry = new BoxBufferGeometry(2, 2, 2);
     const material = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
     const cube = new Mesh(geometry, material);
@@ -355,10 +366,10 @@ class Geometries {
     }
 
     return tetrahedron;
-  }
+  }*/
 
   makeLineBetweenPoints() {
-    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 2 } );
+    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 10 } );
     const lineGeo = new BufferGeometry().setFromPoints( points );
     const line = new Line( lineGeo, material );
 

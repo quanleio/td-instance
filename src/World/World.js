@@ -40,13 +40,13 @@ class World {
       loop.updatables.push(cube);
     })*/
 
-    /*const particles = geometryShape.createParticles();
+    const particles = geometryShape.createParticles();
     scene.add(particles);
-    loop.updatables.push(particles);*/
+    loop.updatables.push(particles);
 
-    const instancedShapes = geometryShape.instanceShapes();
-    scene.add(instancedShapes);
-    loop.updatables.push(instancedShapes);
+    // const instancedShapes = geometryShape.instanceShapes();
+    // scene.add(instancedShapes);
+    // loop.updatables.push(instancedShapes);
 
     const line = geometryShape.makeLineBetweenPoints();
     scene.add(line);
