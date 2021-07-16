@@ -19,7 +19,7 @@ import {
 function loadSuzanne() {
   return new Promise((resolve, reject) => {
     new BufferGeometryLoader().load(
-      "../assets/suzanne_buffergeometry.json",
+      'assets/suzanne_buffergeometry.json',
       (buffGeo) => {
         buffGeo.computeVertexNormals();
 
@@ -48,7 +48,7 @@ function loadSuzanne() {
 function loadSakura() {
   return new Promise((resolve, reject) => {
     new BufferGeometryLoader().load(
-        "../assets/sakura.json",
+        "assets/sakura.json",
         (buffGeo) => {
           buffGeo.computeVertexNormals();
           makeInstanceWithRandomPos(buffGeo).then(_instancedMesh => resolve(_instancedMesh));
@@ -69,7 +69,7 @@ function makeInstance(_buffGeo) {
   return new Promise((resolve, reject) => {
     const matrix = new Matrix4();
 
-    fetch("../assets/instances.json")
+    fetch("assets/instances.json")
       .then((r) => r.json())
       .then((instanceData) => {
         let instancedCount = instanceData.length;
@@ -106,7 +106,7 @@ function makeInstanceWithRandomPos(_buffGeo) {
     const color = new Color();
     const count = 1000;
 
-    let textureLeaf = new TextureLoader().load("../assets/branch.002_baseColor.png");
+    let textureLeaf = new TextureLoader().load("assets/branch.002_baseColor.png");
     let material = new MeshBasicMaterial( {
       map: textureLeaf
     } );

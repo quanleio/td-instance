@@ -3,16 +3,26 @@ import { HemisphereLight, DirectionalLight, Vector2 } from 'https://unpkg.com/th
 
 function createHemiLight() {
 
-  return new HemisphereLight( 0xffffff, 0x000000, 1 );
+  // return new HemisphereLight( 0x444444 );
+  const light = new HemisphereLight();
+  light.intensity = 0.35;
+
+  return light;
 }
 
 function createDirLight() {
-  const dirLight = new DirectionalLight(0xffffff, 2.5);
-  dirLight.position.set(-0.5, 0.5, 0.866);
-  dirLight.castShadow = false;
-  dirLight.shadow.mapSize = new Vector2(512, 512);
 
-  return dirLight;
+  /*const light = new DirectionalLight(0xffffff, 2.5);
+  light.position.set(1, 0.4, 0.2);
+  light.castShadow = false;
+  light.shadow.mapSize = new Vector2(512, 512);*/
+
+  const light = new DirectionalLight();
+  light.position.set( 5, 5, 5 );
+  light.castShadow = true;
+  light.shadow.camera.zoom = 2;
+
+  return light;
 }
 
 export { createHemiLight, createDirLight };

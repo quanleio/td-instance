@@ -17,7 +17,14 @@ class Ray {
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
 
-      const intersects = this.raycaster.intersectObjects(this.scene.children);
+      let objects = [];
+      this.scene.children.forEach(child => {
+        if (child.type === 'Line') return;
+        objects.push(child);
+      })
+
+      // const intersects = this.raycaster.intersectObjects(this.scene.children);
+      const intersects = this.raycaster.intersectObjects(objects);
       this.setColor(intersects);
     });
   }
@@ -31,10 +38,11 @@ class Ray {
         case "Mesh":
           INTERSECTED.material.color.set( color.setHex(Math.random() * 0xffffff) );
           break;
+        case 'Line': break;
         case "InstancedMesh":
           const instanceId = intersects[0].instanceId;
-          intersects[0].object.setColorAt( instanceId, color.setHex(Math.random() * 0xffffff)
-          );
+          console.error('instanceId:', instanceId);
+          intersects[0].object.setColorAt( instanceId, color.setHex(Math.random() * 0xffffff));
           intersects[0].object.instanceColor.needsUpdate = true;
           break;
       }

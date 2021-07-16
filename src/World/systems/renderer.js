@@ -1,5 +1,5 @@
 
-import { WebGLRenderer } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+import { WebGLRenderer, sRGBEncoding } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 
 function createRenderer() {
 
@@ -7,6 +7,8 @@ function createRenderer() {
 
   // turn on the physically correct lighting model
   renderer.physicallyCorrectLights = true;
+
+  renderer.outputEncoding = sRGBEncoding;
 
   // set the pixel ratio (for mobile devices)
   // renderer.setPixelRatio(window.devicePixelRatio);

@@ -7,7 +7,8 @@ import {createControl} from './systems/controls.js';
 import {Loop} from './systems/Loop.js';
 import {Resizer} from './systems/Resizer.js';
 import {Ray} from './systems/Ray.js';
-import {createCube} from './components/cube.js';
+import { Geometries } from './components/Geometries.js';
+// import {makeLineBetweenPoints} from './components/line.js';
 
 // These variables are module-scoped: we cannot access them
 // from outside the module
@@ -26,20 +27,41 @@ class World {
     const dirLight = createDirLight();
     scene.add(dirLight, hemiLight);
 
-    // cube
-    const cube = createCube();
-    scene.add(cube);
-    loop.updatables.push(cube);
+    // 3d geometries
+    const geometryShape = new Geometries();
 
-    // model
-    loadSuzanne().then(_model => {
+    /*const shape = geometryShape.generateShapes();
+    scene.add(shape);
+    loop.updatables.push(shape);*/
+
+    /*const cubes = geometryShape.randomCube();
+    cubes.forEach(cube => {
+      scene.add(cube);
+      loop.updatables.push(cube);
+    })*/
+
+    /*const particles = geometryShape.createParticles();
+    scene.add(particles);
+    loop.updatables.push(particles);*/
+
+    const instancedShapes = geometryShape.instanceShapes();
+    scene.add(instancedShapes);
+    loop.updatables.push(instancedShapes);
+
+    const line = geometryShape.makeLineBetweenPoints();
+    scene.add(line);
+    loop.updatables.push(line);
+
+    // Suzanne model
+   /* loadSuzanne().then(_model => {
       scene.add(_model);
       loop.updatables.push(_model);
-    });
+    });*/
 
-    loadSakura().then(_model => {
+    // Sakura model
+    /*loadSakura().then(_model => {
       scene.add(_model);
-    })
+    })*/
 
     // control
     controls = createControl(camera, renderer);
