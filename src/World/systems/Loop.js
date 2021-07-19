@@ -1,18 +1,20 @@
 import {Clock, Layers, MeshBasicMaterial} from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 
 const clock = new Clock();
-const darkMaterial = new MeshBasicMaterial({ color: "black" });
-const materials = {};
-const bloomLayer = new Layers();
-bloomLayer.set( 1 );
+// const darkMaterial = new MeshBasicMaterial({ color: "black" });
+// const materials = {};
+// const bloomLayer = new Layers();
+// bloomLayer.set( 1 );
 
 class Loop {
-  constructor(camera, scene, renderer, composer) {
+  constructor(camera, scene, renderer, sceneComposer) {
     this.camera = camera;
     this.scene = scene;
     this.renderer = renderer;
     this.updatables = [];
-    this.composer = composer;
+    this.sceneComposer = sceneComposer;
+
+    console.error(this.sceneComposer)
   }
 
   start() {
@@ -23,10 +25,12 @@ class Loop {
       this.renderer.render(this.scene, this.camera);
 
       // render bloom
-      this.renderBloom(true);
+      // this.renderBloom(true);
+      this.sceneComposer.renderBloom(true);
 
       // render the entire scene, then render bloom scene on top
-      this.composer.sceneComposer.render();
+      // this.composer.sceneComposer.render();
+      this.sceneComposer.render();
     });
   }
 
@@ -45,7 +49,7 @@ class Loop {
     }
   }
 
-  renderBloom(mask) {
+  /*renderBloom(mask) {
     if (mask === true) {
       this.scene.traverse( this.darkenNonBloomed );
       this.composer.bloomComposer.render();
@@ -65,7 +69,7 @@ class Loop {
       obj.material = materials[obj.uuid];
       delete materials[obj.uuid];
     }
-  }
+  }*/
 
 }
 

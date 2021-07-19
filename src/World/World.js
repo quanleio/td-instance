@@ -10,7 +10,8 @@ import {createControl} from './systems/controls.js';
 import {Loop} from './systems/Loop.js';
 import {Resizer} from './systems/Resizer.js';
 import {Ray} from './systems/Ray.js';
-import {createComposer} from './systems/sceneComposer.js';
+import {SceneComposer} from './systems/SceneComposer.js';
+// import {createComposer} from './systems/sceneComposer.js';
 
 // These variables are module-scoped: we cannot access them
 // from outside the module
@@ -24,10 +25,12 @@ class World {
     renderer = createRenderer();
 
     // composer
-    composer = createComposer(scene, camera, renderer);
+    // composer = createComposer(scene, camera, renderer);
+    const sceneComposer = new SceneComposer(scene, camera, renderer);
+    composer = sceneComposer.getComposers();
 
     // loop
-    loop = new Loop(camera, scene, renderer, composer);
+    loop = new Loop(camera, scene, renderer, sceneComposer);
 
     const hemiLight = createHemiLight();
     const dirLight = createDirLight();
