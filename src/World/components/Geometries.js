@@ -9,7 +9,7 @@ import {
   LineBasicMaterial,
   RawShaderMaterial,
   MeshLambertMaterial,
-  MeshPhysicalMaterial,
+  MeshPhysicalMaterial,MeshBasicMaterial,
   Line,
   Mesh,
   InstancedMesh,
@@ -191,6 +191,9 @@ class Geometries {
     let particleSystem = new Points( geometry, shaderMaterial );
     particleSystem.sortParticles = true;
 
+    // Dont apply bloom for particles
+    particleSystem.layers.enable(0);
+
     console.error(particleSystem)
 
     particleSystem.tick = (delta) => {
@@ -199,7 +202,7 @@ class Geometries {
       const sizes = geometry.attributes.size.array;
       for ( let i = 0; i < particleCount; i ++ ) {
         // sizes[ i ] = 10 * ( 1 + Math.sin( 0.1 * i + time ) );
-        sizes[ i ] = 4 * ( 1 + Math.sin( 0.1 * i + time ) );
+        sizes[ i ] = 2 * ( 1 + Math.sin( 0.1 * i + time ) );
       }
       geometry.attributes.size.needsUpdate = true;
     }
@@ -228,16 +231,7 @@ class Geometries {
 
     for ( let i = 0; i < shapes.count; i ++ ) {
 
-      /*let radius = Math.random();
-      radius = Math.pow(Math.sin(radius * Math.PI / 2), 0.8);
-      let alpha = Math.random()* 3.14;
-      let delta = Math.random()* 3.14 * 2;
-
-      // generate position in sphere shape
-      matrix.setPosition( radius * Math.cos(delta) * Math.sin(alpha), radius * Math.sin(delta) * Math.sin(alpha), radius * Math.cos(alpha) );*/
-
       // genertate position in cube shape
-      // matrix.setPosition( Math.random()*2 - 1, Math.random()*2-1, Math.random()*2 - 0.5 );
       let randomX = Math.random()*40 - 20;
       let randomY = Math.random()*30 - 10;
       let randomZ = Math.random()*20 - 10;
@@ -252,6 +246,10 @@ class Geometries {
       points.push(vec);
 
       shapes.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
+
+      // Enable bloom layers
+      // shapes.layers.enable(1);
+      if ( Math.random() < 0.25 ) shapes.layers.enable(1);
     }
 
     shapes.tick = (delta) => {
@@ -385,7 +383,7 @@ class Geometries {
    * @returns {*}
    */
   makeLineBetweenPoints() {
-    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 10, transparent: true, opacity: .3 } );
+    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 10, transparent: true, opacity: .1 } );
     const lineGeo = new BufferGeometry().setFromPoints( points );
     const line = new Line( lineGeo, material );
 

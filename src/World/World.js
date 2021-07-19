@@ -1,20 +1,21 @@
 import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-import { RGBELoader } from '../../../vendor/RGBELoader.js';
+import { RGBELoader } from '../../vendor2/RGBELoader.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
-import {loadSakura, loadSuzanne} from './components/model.js';
+// import {loadSakura, loadSuzanne} from './components/model.js';
 import {createDirLight, createHemiLight} from './components/lights.js';
+import { Geometries } from './components/Geometries.js';
 import {createRenderer} from './systems/renderer.js';
 import {createControl} from './systems/controls.js';
 import {Loop} from './systems/Loop.js';
 import {Resizer} from './systems/Resizer.js';
 import {Ray} from './systems/Ray.js';
-import { Geometries } from './components/Geometries.js';
-// import {makeLineBetweenPoints} from './components/line.js';
+import {createComposer} from './systems/sceneComposer.js';
 
 // These variables are module-scoped: we cannot access them
 // from outside the module
 let camera, scene, renderer, controls, loop;
+let composer={};
 
 class World {
   constructor() {
@@ -22,8 +23,11 @@ class World {
     scene = createScene();
     renderer = createRenderer();
 
+    // composer
+    composer = createComposer(scene, camera, renderer);
+
     // loop
-    loop = new Loop(camera, scene, renderer);
+    loop = new Loop(camera, scene, renderer, composer);
 
     const hemiLight = createHemiLight();
     const dirLight = createDirLight();
@@ -65,7 +69,7 @@ class World {
       scene.add(_model);
     })*/
 
-    // 2. Set background for scene as image
+    // Set background for scene as image
     let pmremGenerator = new PMREMGenerator( renderer );
     pmremGenerator.compileEquirectangularShader();
 
@@ -92,7 +96,7 @@ class World {
     new Ray(scene, camera);
 
     // resize
-    new Resizer(camera, renderer);
+    new Resizer(camera, renderer, composer);
   }
 
   render() {
