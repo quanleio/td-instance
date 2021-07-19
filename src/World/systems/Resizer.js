@@ -17,7 +17,7 @@ class Resizer {
 
     window.addEventListener('resize', () => {
       // set the size again if a resize occurs
-      setSize(camera, renderer);
+      setSize(camera, renderer, composer);
       // perform any custom actions
       this.onResize();
     });

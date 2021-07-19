@@ -1,6 +1,5 @@
 import {
   BoxBufferGeometry,
-  SphereBufferGeometry,
   TetrahedronBufferGeometry,
   BufferGeometry,
   InstancedBufferGeometry,
@@ -8,16 +7,24 @@ import {
   MeshStandardMaterial,
   LineBasicMaterial,
   RawShaderMaterial,
-  MeshLambertMaterial,
-  MeshPhysicalMaterial,MeshBasicMaterial,
+  TextureLoader,
+  Object3D,
   Line,
   Mesh,
   InstancedMesh,
+  Points,
+  InstancedBufferAttribute,
+  Float32BufferAttribute,
   MathUtils,
   Color,
-  Vector3,Points,
-  Quaternion,DynamicDrawUsage,TextureLoader,AdditiveBlending,FrontSide, BackSide,
-  Euler, Matrix4,DoubleSide,Float32BufferAttribute,InstancedBufferAttribute,Vector4,Object3D,BufferAttribute
+  Vector3,
+  Vector4,
+  Matrix4,
+  Quaternion,
+  DynamicDrawUsage,
+  AdditiveBlending,
+  Euler,
+  DoubleSide,
 } from "https://unpkg.com/three@0.130.0/build/three.module.js";
 
 const radiansPerSecond = MathUtils.degToRad(30);
