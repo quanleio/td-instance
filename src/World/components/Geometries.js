@@ -9,13 +9,14 @@ import {
   LineBasicMaterial,
   RawShaderMaterial,
   MeshLambertMaterial,
+  MeshPhysicalMaterial,
   Line,
   Mesh,
   InstancedMesh,
   MathUtils,
   Color,
   Vector3,Points,
-  Quaternion,DynamicDrawUsage,TextureLoader,AdditiveBlending,
+  Quaternion,DynamicDrawUsage,TextureLoader,AdditiveBlending,FrontSide, BackSide,
   Euler, Matrix4,DoubleSide,Float32BufferAttribute,InstancedBufferAttribute,Vector4,Object3D,BufferAttribute
 } from "https://unpkg.com/three@0.130.0/build/three.module.js";
 
@@ -26,6 +27,10 @@ class Geometries {
 
   constructor() {}
 
+  /**
+   * Using InstancedBufferGeometry to generate triangles.
+   * @returns {*}
+   */
   generateShapes() {
     let dummy = new Object3D();
     const count = 1000;
@@ -126,14 +131,17 @@ class Geometries {
     return mesh;
   }
 
+  /**
+   * Create particles and make lines
+   * @returns {*}
+   */
   createParticles() {
-    const particleCount = 100;
+    const particleCount = 300;
     const radius = 10;
     const positions = [];
     const colors = [];
     const sizes = [];
     const color = new Color();
-    const matrix = new Matrix4();
 
     let uniforms = {
       pointTexture: { value: new TextureLoader().load( "assets/spark1.png" ) }
@@ -146,29 +154,25 @@ class Geometries {
       blending: AdditiveBlending,
       depthTest: false,
       transparent: true,
-      vertexColors: true
+      vertexColors: true,
     } );
-
-    /*let geometry = new BufferGeometry();
-    for ( let i = 0; i < particleCount; i ++ ) {
-
-      positions.push( ( Math.random() * 2 - 1 ) * radius );
-      positions.push( ( Math.random() * 2 - 1 ) * radius );
-      positions.push( ( Math.random() * 2 - 1 ) * radius );
-
-      color.setHSL( i / particleCount, 1.0, 0.5 );
-      colors.push( color.r, color.g, color.b );
-      sizes.push( 200 );
-    }
-
-    geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );*/
 
     const geometry = new BufferGeometry();
     for ( let i = 0; i < particleCount; i ++ ) {
 
-      const randomX = ( Math.random() * 2 - 1 ) * radius;
-      const randomY = ( Math.random() * 2 - 1 ) * radius;
-      const randomZ = ( Math.random() * 2 - 1 ) * radius;
+      /*let radius = Math.random();
+      radius = Math.pow(Math.sin(radius * Math.PI / 2), 0.8);
+      let alpha = Math.random()* 3.14 * 20;
+      let delta = Math.random()* 3.14 * 40;
+
+      // generate position in sphere shape
+      const randomX = radius * Math.cos(delta) * Math.sin(alpha);
+      const randomY = radius * Math.sin(delta) * Math.sin(alpha);
+      const randomZ = radius * Math.cos(alpha);*/
+
+      const randomX = ( Math.random() * 4 - 2 ) * radius;
+      const randomY = ( Math.random() * 4 - 2 ) * radius;
+      const randomZ = ( Math.random() * 4 - 2 ) * radius;
 
       positions.push( randomX );
       positions.push( randomY );
@@ -178,7 +182,7 @@ class Geometries {
 
       color.setHSL( i / particleCount, 1.0, 0.5 );
       colors.push( color.r, color.g, color.b );
-      sizes.push( 200 );
+      sizes.push( 20 );
     }
 
     geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
@@ -190,63 +194,67 @@ class Geometries {
     console.error(particleSystem)
 
     particleSystem.tick = (delta) => {
-      const time = Date.now() * 0.005;
-      // const time = performance.now();
+      const time = Date.now() * 0.002;
 
       const sizes = geometry.attributes.size.array;
       for ( let i = 0; i < particleCount; i ++ ) {
-        sizes[ i ] = 10 * ( 1 + Math.sin( 0.1 * i + time ) );
+        // sizes[ i ] = 10 * ( 1 + Math.sin( 0.1 * i + time ) );
+        sizes[ i ] = 4 * ( 1 + Math.sin( 0.1 * i + time ) );
       }
       geometry.attributes.size.needsUpdate = true;
-
-      // var particle = geometry.vertices[particleCount];
-      // particle.y = Math.random() * 500 - 250;
-      // particleSystem.geometry.vertices.needsUpdate = true;
     }
 
     return particleSystem;
   }
 
+  /**
+   * Generate cubes using Instaned Mesh and makes lines
+   * @returns {*}
+   */
   instanceShapes() {
     const matrix = new Matrix4();
     const color = new Color();
     let amount = 10;
     const dummy = new Object3D();
 
-    const geometryBox = new BoxBufferGeometry(  0.1, 0.1, 0.1 );
-    const material = new MeshLambertMaterial();
+    const geometry = new TetrahedronBufferGeometry(0.8, 0);
+    const material = new MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
 
-    let boxes = new InstancedMesh( geometryBox, material, 100 );
-    boxes.type = "InstancedMesh";
-    boxes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
-    boxes.castShadow = true;
-    boxes.receiveShadow = true;
+    let shapes = new InstancedMesh( geometry, material, 10 );
+    shapes.type = "InstancedMesh";
+    shapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    shapes.castShadow = true;
+    shapes.receiveShadow = true;
 
-    for ( let i = 0; i < boxes.count; i ++ ) {
+    for ( let i = 0; i < shapes.count; i ++ ) {
 
-      let radius = Math.random();
+      /*let radius = Math.random();
       radius = Math.pow(Math.sin(radius * Math.PI / 2), 0.8);
       let alpha = Math.random()* 3.14;
       let delta = Math.random()* 3.14 * 2;
 
       // generate position in sphere shape
-      matrix.setPosition( radius * Math.cos(delta) * Math.sin(alpha), radius * Math.sin(delta) * Math.sin(alpha), radius * Math.cos(alpha) );
+      matrix.setPosition( radius * Math.cos(delta) * Math.sin(alpha), radius * Math.sin(delta) * Math.sin(alpha), radius * Math.cos(alpha) );*/
 
       // genertate position in cube shape
       // matrix.setPosition( Math.random()*2 - 1, Math.random()*2-1, Math.random()*2 - 0.5 );
-      boxes.setMatrixAt( i, matrix );
+      let randomX = Math.random()*40 - 20;
+      let randomY = Math.random()*30 - 10;
+      let randomZ = Math.random()*20 - 10;
+      matrix.setPosition( randomX, randomY , randomZ );
+      shapes.setMatrixAt( i, matrix );
       let identity = new Matrix4().identity();
-      boxes.getMatrixAt(i, identity);
+      shapes.getMatrixAt(i, identity);
 
       // Get position of each instance and push into points.
       var vec = new Vector3();
       vec.setFromMatrixPosition( identity );
       points.push(vec);
 
-      boxes.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
+      shapes.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
     }
 
-    boxes.tick = (delta) => {
+    shapes.tick = (delta) => {
 
       /*const time = Date.now() * 0.001;
       const offset = ( amount - 1 ) / 2;
@@ -265,9 +273,13 @@ class Geometries {
       boxes.instanceMatrix.needsUpdate = true;*/
     }
 
-    return boxes;
+    return shapes;
   }
 
+  /**
+   * Random cubes, use normal Mesh
+   * @returns {*[]}
+   */
   randomCube() {
     let count = 100;
     let cubes=[];
@@ -368,8 +380,12 @@ class Geometries {
     return tetrahedron;
   }*/
 
+  /**
+   * Make line between points
+   * @returns {*}
+   */
   makeLineBetweenPoints() {
-    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 10 } );
+    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 10, transparent: true, opacity: .3 } );
     const lineGeo = new BufferGeometry().setFromPoints( points );
     const line = new Line( lineGeo, material );
 

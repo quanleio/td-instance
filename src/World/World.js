@@ -1,3 +1,5 @@
+import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+import { RGBELoader } from '../../../vendor/RGBELoader.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
 import {loadSakura, loadSuzanne} from './components/model.js';
@@ -44,9 +46,9 @@ class World {
     scene.add(particles);
     loop.updatables.push(particles);
 
-    // const instancedShapes = geometryShape.instanceShapes();
-    // scene.add(instancedShapes);
-    // loop.updatables.push(instancedShapes);
+    const instancedShapes = geometryShape.instanceShapes();
+    scene.add(instancedShapes);
+    loop.updatables.push(instancedShapes);
 
     const line = geometryShape.makeLineBetweenPoints();
     scene.add(line);
@@ -62,6 +64,25 @@ class World {
     /*loadSakura().then(_model => {
       scene.add(_model);
     })*/
+
+    // 2. Set background for scene as image
+    let pmremGenerator = new PMREMGenerator( renderer );
+    pmremGenerator.compileEquirectangularShader();
+
+    new RGBELoader()
+    .setDataType( UnsignedByteType )
+    .setPath( './assets/' )
+    .load( 'royal_esplanade_1k.hdr', function ( texture ) {
+
+      let envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+      // scene.background = envMap;
+      scene.environment = envMap;
+
+      texture.dispose();
+      pmremGenerator.dispose();
+
+    });
 
     // control
     controls = createControl(camera, renderer);

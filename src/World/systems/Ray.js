@@ -16,6 +16,7 @@ class Ray {
       this.mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
+      this.raycaster.params.Points.threshold = 0.1;
 
       let objects = [];
       this.scene.children.forEach(child => {
@@ -39,6 +40,15 @@ class Ray {
           INTERSECTED.material.color.set( color.setHex(Math.random() * 0xffffff) );
           break;
         case 'Line': break;
+        case 'Points':
+          const pointIndex = intersects[0].index;
+          console.error('pointIndex:', pointIndex, 'point:', intersects[0]);
+
+          // let newColor = color.setHex(Math.random() * 0xffffff);
+          // intersects[0].object.geometry.colors[pointIndex] = newColor;
+          // intersects[0].object.geometry.colorsNeedUpdate=true;
+
+          break;
         case "InstancedMesh":
           const instanceId = intersects[0].instanceId;
           console.error('instanceId:', instanceId);
