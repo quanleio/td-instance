@@ -1,4 +1,4 @@
-import { PMREMGenerator, UnsignedByteType, Vector3 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 import { RGBELoader } from '../../vendor2/RGBELoader.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
@@ -50,19 +50,20 @@ class World {
     // const particles = geometryShape.createParticles();
     // scene.add(particles);
     // loop.updatables.push(particles);
-    //
-    // const instancedShapes = geometryShape.instanceShapes();
-    // instancedShapes.forEach(shape => {
-    //   scene.add(shape);
-    //   loop.updatables.push(shape);
-    // })
 
-    geometryShape.makeTree().then(branch => {
-      branch.forEach(_branch => {
-        scene.add(_branch)
-        loop.updatables.push(_branch);
-      })
-    });
+    const instancedShapes = geometryShape.instanceShapes();
+    instancedShapes.forEach(shape => {
+      scene.add(shape);
+      loop.updatables.push(shape);
+    })
+
+    // tree
+    // geometryShape.makeTree().then(branch => {
+    //   branch.forEach(_branch => {
+    //     scene.add(_branch)
+    //     loop.updatables.push(_branch);
+    //   })
+    // });
 
     // Suzanne model
     // loadSuzanne().then(_model => {
@@ -95,7 +96,6 @@ class World {
 
       texture.dispose();
       pmremGenerator.dispose();
-
     });
 
     // control

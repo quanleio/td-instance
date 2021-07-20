@@ -34,7 +34,6 @@ import {
 } from "https://unpkg.com/three@0.130.0/build/three.module.js";
 
 const radiansPerSecond = MathUtils.degToRad(30);
-let points= [];
 
 class Geometries {
 
@@ -51,6 +50,7 @@ class Geometries {
     const colors = [];
     const sizes = [];
     const color = new Color();
+    let points = [];
 
     let uniforms = {
       pointTexture: { value: new TextureLoader().load( "assets/spark1.png" ) }
@@ -90,6 +90,11 @@ class Geometries {
     let particleSystem = new Points( geometry, shaderMaterial );
     particleSystem.sortParticles = true;
 
+    // add lines
+    let line = this.addLine(points);
+    particleSystem.add(line);
+    line.matrixAutoUpdate = false;
+
     // Dont apply bloom for particles
     particleSystem.layers.enable(0);
 
@@ -118,6 +123,13 @@ class Geometries {
     let position = new Vector3();
     let rotation = new Euler();
     const quaternion = new Quaternion();
+    let points = [];
+
+    let lastTime = 0;
+    const moveQ = new Quaternion( 0.5, 0.5, 0.5, 0.0 ).normalize();
+    const tmpQ = new Quaternion();
+    const tmpM = new Matrix4();
+    const currentM = new Matrix4();
 
     const totalMesh = this.createMesh();
 
@@ -149,11 +161,14 @@ class Geometries {
         // points.push(vec);
 
         points.push(new Vector3(randomX, randomY, randomZ));
-        // line.points.push(new Vector3(randomX, randomY, randomZ));
 
         // Enable bloom layers
         mesh.layers.enable(1);
       }
+
+      let line = this.addLine(points);
+      mesh.add(line);
+      line.matrixAutoUpdate = false;
 
       mesh.tick = (delta) => {
 
@@ -165,7 +180,23 @@ class Geometries {
         // points.push(rotation);
         // mesh.setMatrixAt( 0, matrix );
 
-        for (let index=0; index< mesh.count; index++) {
+        /*const time = performance.now();
+        // mesh.rotation.y = time * 0.00005;
+        const delta2 = ( time - lastTime ) / 5000;
+        tmpQ.set( moveQ.x * delta2, moveQ.y * delta2, moveQ.z * delta2, 1 ).normalize();
+        tmpM.makeRotationFromQuaternion( tmpQ );
+
+        for ( let i = 0, il = mesh.count; i < il; i ++ ) {
+
+          mesh.getMatrixAt( i, currentM );
+          currentM.multiply( tmpM );
+          mesh.setMatrixAt( i, currentM );
+
+        }
+        mesh.instanceMatrix.needsUpdate = true;
+        lastTime = time;*/
+
+        for (let index=0; index < mesh.count; index++) {
 
           // rotation
           mesh.getMatrixAt(index, matrix);
@@ -383,8 +414,6 @@ class Geometries {
         break;
     }
 
-
-
     instancedDan.tick = (delta) => {
       // instancedDan.rotation.y += radiansPerSecond * delta;
     }
@@ -392,6 +421,11 @@ class Geometries {
     return instancedDan;
   }
 
+  /**
+   * Create tube as branch of the tree.
+   * @param _points
+   * @returns {*}
+   */
   addTube(_points) {
 
     // const pipeSpline = new CatmullRomCurve3( [
@@ -405,7 +439,7 @@ class Geometries {
     //   new Vector3( 0, 0, 30 ),
     // ] );
 
-    console.error(_points);
+    // console.error(_points);
     // const pipeSpline = new CatmullRomCurve3( [
     //   new Vector3( 0, 0, 0 ),
     //   new Vector3( -0.023828517645597458, 0.9530288577079773, 0.11299587041139603 ),
@@ -432,6 +466,24 @@ class Geometries {
     tube.scale.setScalar(0.1/10);
 
     return tube;
+  }
+
+  /**
+   * Create lines between points.
+   * @param _points
+   * @returns {*}
+   */
+  addLine(_points) {
+
+    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
+    const lineGeo = new BufferGeometry().setFromPoints( _points );
+    const line = new Line( lineGeo, material );
+
+    // line.tick = (delta) => {
+    //   line.geometry.setFromPoints(points);
+    //   line.geometry.attributes.position.needsUpdate = true;
+    // }
+    return line;
   }
 
   /**
@@ -581,7 +633,7 @@ class Geometries {
    * Make line between points
    * @returns {*}
    */
-  makeLineBetweenPoints() {
+  /*makeLineBetweenPoints() {
     const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
     const lineGeo = new BufferGeometry().setFromPoints( points );
     const line = new Line( lineGeo, material );
@@ -591,7 +643,7 @@ class Geometries {
       line.geometry.attributes.position.needsUpdate = true;
     }
     return line;
-  }
+  }*/
 }
 
 /**

@@ -1,5 +1,5 @@
 
-import { WebGLRenderer, sRGBEncoding } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+import { WebGLRenderer, sRGBEncoding, ACESFilmicToneMapping } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 
 function createRenderer() {
 
@@ -9,6 +9,8 @@ function createRenderer() {
   renderer.physicallyCorrectLights = true;
 
   renderer.outputEncoding = sRGBEncoding;
+  // renderer.toneMapping = ACESFilmicToneMapping;
+  // renderer.toneMappingExposure = 1;
 
   // set the pixel ratio (for mobile devices)
   // renderer.setPixelRatio(window.devicePixelRatio);
