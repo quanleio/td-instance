@@ -1,8 +1,8 @@
-import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+import { PMREMGenerator, UnsignedByteType, Vector3 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 import { RGBELoader } from '../../vendor2/RGBELoader.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
-// import {loadSakura, loadSuzanne} from './components/model.js';
+import {loadSakura, loadSuzanne} from './components/model.js';
 import {createDirLight, createHemiLight} from './components/lights.js';
 import { Geometries } from './components/Geometries.js';
 import {createRenderer} from './systems/renderer.js';
@@ -11,7 +11,6 @@ import {Loop} from './systems/Loop.js';
 import {Resizer} from './systems/Resizer.js';
 import {Ray} from './systems/Ray.js';
 import {SceneComposer} from './systems/SceneComposer.js';
-// import {createComposer} from './systems/sceneComposer.js';
 
 // These variables are module-scoped: we cannot access them
 // from outside the module
@@ -24,8 +23,7 @@ class World {
     scene = createScene();
     renderer = createRenderer();
 
-    // composer
-    // composer = createComposer(scene, camera, renderer);
+    // composers
     const sceneComposer = new SceneComposer(scene, camera, renderer);
     composer = sceneComposer.getComposers();
 
@@ -43,34 +41,43 @@ class World {
     scene.add(shape);
     loop.updatables.push(shape);*/
 
-    /*const cubes = geometryShape.randomCube();
-    cubes.forEach(cube => {
-      scene.add(cube);
-      loop.updatables.push(cube);
-    })*/
+    // const cubes = geometryShape.randomCube();
+    // cubes.forEach(cube => {
+    //   scene.add(cube);
+    //   loop.updatables.push(cube);
+    // })
 
     const particles = geometryShape.createParticles();
     scene.add(particles);
     loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
-    scene.add(instancedShapes);
-    loop.updatables.push(instancedShapes);
+    instancedShapes.forEach(shape => {
+      scene.add(shape);
+      loop.updatables.push(shape);
+    })
+
+    geometryShape.makeTree().then(branch => {
+      branch.forEach(_branch => {
+        scene.add(_branch)
+        loop.updatables.push(_branch);
+      })
+    });
+
+    // Suzanne model
+    // loadSuzanne().then(_model => {
+    //   scene.add(_model);
+    //   loop.updatables.push(_model);
+    // });
+
+    // Sakura model
+    // loadSakura().then(_model => {
+    //   scene.add(_model);
+    // })
 
     const line = geometryShape.makeLineBetweenPoints();
     scene.add(line);
     loop.updatables.push(line);
-
-    // Suzanne model
-   /* loadSuzanne().then(_model => {
-      scene.add(_model);
-      loop.updatables.push(_model);
-    });*/
-
-    // Sakura model
-    /*loadSakura().then(_model => {
-      scene.add(_model);
-    })*/
 
     // Set background for scene as image
     let pmremGenerator = new PMREMGenerator( renderer );

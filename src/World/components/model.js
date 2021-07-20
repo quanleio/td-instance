@@ -4,6 +4,7 @@ import {
   MeshPhongMaterial,
   MeshBasicMaterial,
   InstancedMesh,
+  Object3D,
   Color,
   Vector3,
   Matrix4,
@@ -29,7 +30,7 @@ function loadSuzanne() {
 
           // this method will be called once per frame
           _instancedMesh.tick = ( delta ) => {
-            _instancedMesh.rotation.y += radiansPerSecond * delta;
+            // _instancedMesh.rotation.y += radiansPerSecond * delta;
           }
 
           resolve(_instancedMesh);
@@ -87,6 +88,9 @@ function makeInstance(_buffGeo) {
           matrix.setPosition(pos);
           instancedMesh.setMatrixAt(i, matrix);
           instancedMesh.setColorAt(i, color);
+
+          // Enable bloom layers
+          // instancedMesh.layers.enable(1);
         }
 
         resolve(instancedMesh);
@@ -104,7 +108,9 @@ function makeInstanceWithRandomPos(_buffGeo) {
   return new Promise((resolve, reject) => {
     const matrix = new Matrix4();
     const color = new Color();
-    const count = 1000;
+    const count = 3;
+    const dummy = new Object3D();
+    let points = [];
 
     let textureLeaf = new TextureLoader().load("assets/branch.002_baseColor.png");
     let material = new MeshBasicMaterial( {
@@ -120,7 +126,16 @@ function makeInstanceWithRandomPos(_buffGeo) {
       randomizeMatrix(matrix);
       instancedMesh.setMatrixAt(i, matrix);
       instancedMesh.setColorAt(i, color);
+
+      instancedMesh.getMatrixAt(i, matrix);
+      matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+      points.push(dummy.position);
+
+      // Enable bloom layers
+      // if (Math.random() < 0.25) instancedMesh.layers.enable(1);
     }
+
+    console.error(points);
 
     resolve(instancedMesh);
   });

@@ -1,6 +1,9 @@
 import {
   BoxBufferGeometry,
   TetrahedronBufferGeometry,
+  IcosahedronBufferGeometry,
+  OctahedronBufferGeometry,
+  SphereBufferGeometry,
   BufferGeometry,
   InstancedBufferGeometry,
   ShaderMaterial,
@@ -33,6 +36,368 @@ let points= [];
 class Geometries {
 
   constructor() {}
+
+  /**
+   * Create particles and make lines
+   * @returns {*}
+   */
+  createParticles() {
+    const particleCount = 300;
+    const radius = 10;
+    const positions = [];
+    const colors = [];
+    const sizes = [];
+    const color = new Color();
+
+    let uniforms = {
+      pointTexture: { value: new TextureLoader().load( "assets/spark1.png" ) }
+    };
+
+    const shaderMaterial = new ShaderMaterial( {
+      uniforms: uniforms,
+      vertexShader: document.getElementById( 'vertexshader' ).textContent,
+      fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+      blending: AdditiveBlending,
+      depthTest: false,
+      transparent: true,
+      vertexColors: true,
+    } );
+
+    const geometry = new BufferGeometry();
+    for ( let i = 0; i < particleCount; i ++ ) {
+
+      const randomX = ( Math.random() * 4 - 2 ) * radius;
+      const randomY = ( Math.random() * 4 - 2 ) * radius;
+      const randomZ = ( Math.random() * 4 - 2 ) * radius;
+
+      positions.push( randomX );
+      positions.push( randomY );
+      positions.push( randomZ );
+
+      points.push(new Vector3(randomX, randomY, randomZ));
+
+      color.setHSL( i / particleCount, 1.0, 0.5 );
+      colors.push( color.r, color.g, color.b );
+      sizes.push( 20 );
+    }
+
+    geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
+    geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
+    geometry.setAttribute( 'size', new Float32BufferAttribute( sizes, 1 ).setUsage( DynamicDrawUsage ) );
+    let particleSystem = new Points( geometry, shaderMaterial );
+    particleSystem.sortParticles = true;
+
+    // Dont apply bloom for particles
+    particleSystem.layers.enable(0);
+
+    particleSystem.tick = (delta) => {
+      const time = Date.now() * 0.002;
+
+      const sizes = geometry.attributes.size.array;
+      for ( let i = 0; i < particleCount; i ++ ) {
+        sizes[ i ] = 2 * ( 1 + Math.sin( 0.1 * i + time ) );
+      }
+      geometry.attributes.size.needsUpdate = true;
+    }
+
+    return particleSystem;
+  }
+
+  /**
+   * Generate position for each Instaned Mesh and makes lines
+   * @returns {*}
+   */
+  instanceShapes() {
+    const matrix = new Matrix4();
+    const color = new Color();
+    let amount = parseInt( window.location.search.substr( 1 ) ) || 10;
+    const dummy = new Object3D();
+    let position = new Vector3();
+    let rotation = new Euler();
+    const quaternion = new Quaternion();
+
+    const totalMesh = this.createMesh();
+
+    totalMesh.forEach( mesh => {
+
+      for ( let i = 0; i < mesh.count; i ++ ) {
+
+        // color
+        mesh.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
+
+        // position
+        const randomX = ( Math.random() * 4 - 2 ) * 10;
+        const randomY = ( Math.random() * 4 - 2 ) * 10;
+        const randomZ = ( Math.random() * 4 - 2 ) * 10;
+
+        // genertate position area in cube shape
+        // let randomX = Math.random()*40 - 20;
+        // let randomY = Math.random()*30 - 10;
+        // let randomZ = Math.random()*20 - 10;
+        matrix.setPosition( randomX, randomY , randomZ );
+        mesh.setMatrixAt( i, matrix );
+
+        // let identity = new Matrix4().identity();
+        // mesh.getMatrixAt(i, identity);
+        //
+        // // Get position of each instance and push into points.
+        // var vec = new Vector3();
+        // vec.setFromMatrixPosition( identity );
+        // points.push(vec);
+
+        points.push(new Vector3(randomX, randomY, randomZ));
+        // line.points.push(new Vector3(randomX, randomY, randomZ));
+
+        // Enable bloom layers
+        mesh.layers.enable(1);
+      }
+
+      mesh.tick = (delta) => {
+
+        // position
+        // mesh.getMatrixAt( 0, matrix ); // first instance
+        // position.setFromMatrixPosition( matrix ); // extract position form transformationmatrix
+        // position.x += 0.01; // move
+        // matrix.setPosition( position ); // write new positon back
+        // points.push(rotation);
+        // mesh.setMatrixAt( 0, matrix );
+
+        for (let index=0; index< mesh.count; index++) {
+
+          // rotation
+          mesh.getMatrixAt(index, matrix);
+          matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+
+          dummy.rotation.x += radiansPerSecond * delta;
+          dummy.rotation.y += radiansPerSecond * delta;
+          dummy.rotation.z += radiansPerSecond * delta;
+
+          dummy.updateMatrix();
+          mesh.setMatrixAt(index, dummy.matrix);
+        }
+        mesh.instanceMatrix.needsUpdate = true;
+      }
+
+    })
+
+    /*shapes.tick = (delta) => {
+
+      /!*const time = Date.now() * 0.001;
+      const offset = ( amount - 1 ) / 2;
+
+      for ( let x = 0; x < amount; x ++ ) {
+        for ( let y = 0; y < amount; y ++ ) {
+          for ( let z = 0; z < amount; z ++ ) {
+            dummy.position.set( offset - x, offset - y, offset - z );
+            dummy.rotation.y = ( Math.sin( x / 4 + time ) + Math.sin( y / 4 + time ) + Math.sin( z / 4 + time ) );
+            dummy.rotation.z = dummy.rotation.y * 2;
+            dummy.updateMatrix();
+            boxes.setMatrixAt( i ++, dummy.matrix );
+          }
+        }
+      }
+      boxes.instanceMatrix.needsUpdate = true;*!/
+    }*/
+
+    return totalMesh;
+  }
+
+  /**
+   * Create instaned mesh for every shape here.
+   * @returns {*[]}
+   */
+  createMesh() {
+    let instanedMeshs = [];
+    const material = new MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
+
+    // tetrahedron
+    const tetraGeo = new TetrahedronBufferGeometry(0.8, 0);
+    let tetraShapes = new InstancedMesh( tetraGeo, material, 10 );
+    tetraShapes.type = "InstancedMesh";
+    tetraShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    tetraShapes.castShadow = true;
+    tetraShapes.receiveShadow = true;
+    // instanedMeshs.push(tetraShapes);
+
+    // Octahedron
+    const octahedronGeo = new OctahedronBufferGeometry(0.8, 0);
+    let octahedronGeoShapes = new InstancedMesh( octahedronGeo, material, 10 );
+    octahedronGeoShapes.type = "InstancedMesh";
+    octahedronGeoShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    octahedronGeoShapes.castShadow = true;
+    octahedronGeoShapes.receiveShadow = true;
+    instanedMeshs.push(octahedronGeoShapes);
+
+    // Icosahedron
+    const icosahedronGeo = new IcosahedronBufferGeometry(0.8, 0);
+    let icosahedronGeoShapes = new InstancedMesh( icosahedronGeo, material, 10 );
+    icosahedronGeoShapes.type = "InstancedMesh";
+    icosahedronGeoShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    icosahedronGeoShapes.castShadow = true;
+    icosahedronGeoShapes.receiveShadow = true;
+    instanedMeshs.push(icosahedronGeoShapes);
+
+    // box
+    const boxGeo = new BoxBufferGeometry(0.8, 0.8, 0.8);
+    let boxShapes = new InstancedMesh( boxGeo, material, 10 );
+    boxShapes.type = "InstancedMesh";
+    boxShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    boxShapes.castShadow = true;
+    boxShapes.receiveShadow = true;
+    // instanedMeshs.push(boxShapes);
+
+    return instanedMeshs;
+  }
+
+  /**
+   * Create tree from JSON data
+   * @returns {Promise<unknown>}
+   */
+  makeTree(){
+    return new Promise((resolve, reject) => {
+      let branchs = [];
+      fetch("assets/4dan.json")
+      .then((r) => r.json())
+      .then(instanceData => {
+        console.error(instanceData);
+
+        let branchA = this.createBranch('danA', instanceData.danA);
+        let branchB = this.createBranch('danB', instanceData.danB);
+        let branchC = this.createBranch('danC', instanceData.danC);
+        let branchD = this.createBranch('danD', instanceData.danD);
+        branchs.push(branchA, branchB, branchC, branchD);
+
+        resolve(branchs);
+      });
+    });
+  }
+
+  /**
+   * Create branch for tree
+   * @param branch
+   * @param data
+   * @returns {*}
+   */
+  createBranch( branch, data ) {
+
+    const matrix = new Matrix4();
+    // let branchs=[];
+    const geometry = new SphereBufferGeometry(.2, 32);
+    let instancedDan;
+
+    switch (branch) {
+      case 'danA':
+        let danACount = data.length;
+        const materialDanA = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new InstancedMesh(geometry, materialDanA, danACount);
+        instancedDan.type = "InstancedMesh";
+
+        for (let i = 0; i < danACount; i++) {
+          let inst = data[i];
+          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          matrix.setPosition(pos);
+          instancedDan.setMatrixAt(i, matrix);
+          // points.push(pos);
+
+          // Enable bloom layers
+          instancedDan.layers.enable(1);
+        }
+        break;
+      case 'danB':
+        let danBCount = data.length;
+        const materialDanB = new MeshStandardMaterial({ color: new Color(0xF2C811).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new InstancedMesh(geometry, materialDanB, danBCount);
+        instancedDan.type = "InstancedMesh";
+
+        for (let i = 0; i < danBCount; i++) {
+          let inst = data[i];
+          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          matrix.setPosition(pos);
+          instancedDan.setMatrixAt(i, matrix);
+
+          // Enable bloom layers
+          instancedDan.layers.enable(1);
+        }
+        break;
+      case 'danC':
+        let danCCount = data.length;
+        const materialDanC = new MeshStandardMaterial({ color: new Color(0x006bff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new InstancedMesh(geometry, materialDanC, danCCount);
+        instancedDan.type = "InstancedMesh";
+
+        for (let i = 0; i < danCCount; i++) {
+          let inst = data[i];
+          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          matrix.setPosition(pos);
+          instancedDan.setMatrixAt(i, matrix);
+
+          // Enable bloom layers
+          instancedDan.layers.enable(1);
+        }
+        break;
+      case 'danD':
+        let danDCount = data.length;
+        const materialDanD = new MeshStandardMaterial({ color: new Color(0xffffff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new InstancedMesh(geometry, materialDanD, danDCount);
+        instancedDan.type = "InstancedMesh";
+
+        for (let i = 0; i < danDCount; i++) {
+          let inst = data[i];
+          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          matrix.setPosition(pos);
+          instancedDan.setMatrixAt(i, matrix);
+
+          // Enable bloom layers
+          instancedDan.layers.enable(1);
+        }
+        break;
+    }
+
+    instancedDan.tick = (delta) => {
+      // instancedDan.rotation.y += radiansPerSecond * delta;
+    }
+
+    return instancedDan;
+  }
+
+  /**
+   * Random cubes, use normal Mesh
+   * @returns {*[]}
+   */
+  randomCube() {
+    let count = 100;
+    let cubes=[];
+
+    const geometry = new BoxBufferGeometry(1, 1, 1);
+    const material = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+
+    for (let i=0; i< count; i++) {
+      const cube = new Mesh(geometry, material);
+
+      cube.position.x = Math.random() * 40 - 20;
+      cube.position.y = Math.random() * 40 - 20;
+      cube.position.z = Math.random() * 40 - 20;
+
+      cube.rotation.x = Math.random() * 2 * Math.PI;
+      cube.rotation.y = Math.random() * 2 * Math.PI;
+      cube.rotation.z = Math.random() * 2 * Math.PI;
+
+      cube.layers.enable(1);
+
+      points.push(cube.position); // ok
+      cube.tick = (delta) => {
+        // increase the cube's rotation each frame
+        cube.rotation.z += radiansPerSecond * delta;
+        cube.rotation.x += radiansPerSecond * delta;
+        cube.rotation.y += radiansPerSecond * delta;
+
+        cube.position.y += radiansPerSecond*delta;
+      }
+
+      cubes.push(cube);
+    }
+    return cubes;
+  }
 
   /**
    * Using InstancedBufferGeometry to generate triangles.
@@ -139,258 +504,11 @@ class Geometries {
   }
 
   /**
-   * Create particles and make lines
-   * @returns {*}
-   */
-  createParticles() {
-    const particleCount = 300;
-    const radius = 10;
-    const positions = [];
-    const colors = [];
-    const sizes = [];
-    const color = new Color();
-
-    let uniforms = {
-      pointTexture: { value: new TextureLoader().load( "assets/spark1.png" ) }
-    };
-
-    const shaderMaterial = new ShaderMaterial( {
-      uniforms: uniforms,
-      vertexShader: document.getElementById( 'vertexshader' ).textContent,
-      fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-      blending: AdditiveBlending,
-      depthTest: false,
-      transparent: true,
-      vertexColors: true,
-    } );
-
-    const geometry = new BufferGeometry();
-    for ( let i = 0; i < particleCount; i ++ ) {
-
-      /*let radius = Math.random();
-      radius = Math.pow(Math.sin(radius * Math.PI / 2), 0.8);
-      let alpha = Math.random()* 3.14 * 20;
-      let delta = Math.random()* 3.14 * 40;
-
-      // generate position in sphere shape
-      const randomX = radius * Math.cos(delta) * Math.sin(alpha);
-      const randomY = radius * Math.sin(delta) * Math.sin(alpha);
-      const randomZ = radius * Math.cos(alpha);*/
-
-      const randomX = ( Math.random() * 4 - 2 ) * radius;
-      const randomY = ( Math.random() * 4 - 2 ) * radius;
-      const randomZ = ( Math.random() * 4 - 2 ) * radius;
-
-      positions.push( randomX );
-      positions.push( randomY );
-      positions.push( randomZ );
-
-      points.push(new Vector3(randomX, randomY, randomZ));
-
-      color.setHSL( i / particleCount, 1.0, 0.5 );
-      colors.push( color.r, color.g, color.b );
-      sizes.push( 20 );
-    }
-
-    geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
-    geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
-    geometry.setAttribute( 'size', new Float32BufferAttribute( sizes, 1 ).setUsage( DynamicDrawUsage ) );
-    let particleSystem = new Points( geometry, shaderMaterial );
-    particleSystem.sortParticles = true;
-
-    // Dont apply bloom for particles
-    particleSystem.layers.enable(0);
-
-    console.error(particleSystem)
-
-    particleSystem.tick = (delta) => {
-      const time = Date.now() * 0.002;
-
-      const sizes = geometry.attributes.size.array;
-      for ( let i = 0; i < particleCount; i ++ ) {
-        // sizes[ i ] = 10 * ( 1 + Math.sin( 0.1 * i + time ) );
-        sizes[ i ] = 2 * ( 1 + Math.sin( 0.1 * i + time ) );
-      }
-      geometry.attributes.size.needsUpdate = true;
-    }
-
-    return particleSystem;
-  }
-
-  /**
-   * Generate cubes using Instaned Mesh and makes lines
-   * @returns {*}
-   */
-  instanceShapes() {
-    const matrix = new Matrix4();
-    const color = new Color();
-    let amount = 10;
-    const dummy = new Object3D();
-
-    const geometry = new TetrahedronBufferGeometry(0.8, 0);
-    const material = new MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
-
-    let shapes = new InstancedMesh( geometry, material, 10 );
-    shapes.type = "InstancedMesh";
-    shapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
-    shapes.castShadow = true;
-    shapes.receiveShadow = true;
-
-    for ( let i = 0; i < shapes.count; i ++ ) {
-
-      // genertate position in cube shape
-      let randomX = Math.random()*40 - 20;
-      let randomY = Math.random()*30 - 10;
-      let randomZ = Math.random()*20 - 10;
-      matrix.setPosition( randomX, randomY , randomZ );
-      shapes.setMatrixAt( i, matrix );
-      let identity = new Matrix4().identity();
-      shapes.getMatrixAt(i, identity);
-
-      // Get position of each instance and push into points.
-      var vec = new Vector3();
-      vec.setFromMatrixPosition( identity );
-      points.push(vec);
-
-      shapes.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
-
-      // Enable bloom layers
-      // shapes.layers.enable(1);
-      if ( Math.random() < 0.25 ) shapes.layers.enable(1);
-    }
-
-    shapes.tick = (delta) => {
-
-      /*const time = Date.now() * 0.001;
-      const offset = ( amount - 1 ) / 2;
-
-      for ( let x = 0; x < amount; x ++ ) {
-        for ( let y = 0; y < amount; y ++ ) {
-          for ( let z = 0; z < amount; z ++ ) {
-            dummy.position.set( offset - x, offset - y, offset - z );
-            dummy.rotation.y = ( Math.sin( x / 4 + time ) + Math.sin( y / 4 + time ) + Math.sin( z / 4 + time ) );
-            dummy.rotation.z = dummy.rotation.y * 2;
-            dummy.updateMatrix();
-            boxes.setMatrixAt( i ++, dummy.matrix );
-          }
-        }
-      }
-      boxes.instanceMatrix.needsUpdate = true;*/
-    }
-
-    return shapes;
-  }
-
-  /**
-   * Random cubes, use normal Mesh
-   * @returns {*[]}
-   */
-  randomCube() {
-    let count = 100;
-    let cubes=[];
-    const matrix = new Matrix4();
-
-    const geometry = new BoxBufferGeometry(1, 1, 1);
-    const material = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-
-    for (let i=0; i< count; i++) {
-      const cube = new Mesh(geometry, material);
-
-      cube.position.x = Math.random() * 40 - 20;
-      cube.position.y = Math.random() * 40 - 20;
-      cube.position.z = Math.random() * 40 - 20;
-
-      cube.rotation.x = Math.random() * 2 * Math.PI;
-      cube.rotation.y = Math.random() * 2 * Math.PI;
-      cube.rotation.z = Math.random() * 2 * Math.PI;
-
-      points.push(cube.position);
-      cube.tick = (delta) => {
-        // increase the cube's rotation each frame
-        cube.rotation.z += radiansPerSecond * delta;
-        cube.rotation.x += radiansPerSecond * delta;
-        cube.rotation.y += radiansPerSecond * delta;
-      }
-
-      cubes.push(cube);
-    }
-    return cubes;
-  }
-
-  /*createCube() {
-    const geometry = new BoxBufferGeometry(2, 2, 2);
-    const material = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-    const cube = new Mesh(geometry, material);
-    cube.name = 'Cube';
-    cube.position.set(0, 10, 0);
-    cube.rotation.set(-0.5, -0.1, -0.5);
-    points.push(cube.position);
-
-    // this method will be called once per frame
-    cube.tick = (delta) => {
-      let timestamp = new Date() * 0.0005; // test
-
-      // increase the cube's rotation each frame
-      cube.rotation.z += radiansPerSecond * delta;
-      cube.rotation.x += radiansPerSecond * delta;
-      cube.rotation.y += radiansPerSecond * delta;
-
-      cube.position.x = Math.cos(timestamp) * 7;
-      cube.position.z = Math.sin(timestamp) * 7;
-    }
-    return cube;
-  }
-
-  createSphere() {
-    const geometry = new SphereBufferGeometry(1.5, 32, 32);
-    const material = new MeshStandardMaterial({ color: new Color(0xF2C811).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-    const sphere = new Mesh(geometry, material);
-    sphere.position.set(2, 0, 0);
-    points.push(sphere.position);
-
-    sphere.tick = (delta) => {
-      let timestamp = new Date() * 0.0005; // test
-
-      sphere.rotation.z += radiansPerSecond * delta;
-      sphere.rotation.x += radiansPerSecond * delta;
-      sphere.rotation.y += radiansPerSecond * delta;
-
-      sphere.position.x = Math.cos(timestamp * 2) * 5;
-      sphere.position.y = Math.sin(timestamp * 2) * 5;
-    };
-
-    return sphere;
-  }
-
-  createTetrahedron() {
-
-    const geometry = new TetrahedronBufferGeometry(2, 0);
-    const material = new MeshStandardMaterial({ color: new Color(0x006bff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-    const tetrahedron = new Mesh(geometry, material);
-    tetrahedron.position.set(-20, 0, 0);
-    tetrahedron.rotation.set(-0.5, -0.1, -0.5);
-    points.push(tetrahedron.position);
-
-    tetrahedron.tick = (delta) => {
-      let timestamp = new Date() * 0.0005; // test
-
-      tetrahedron.rotation.z += radiansPerSecond * delta;
-      tetrahedron.rotation.x += radiansPerSecond * delta;
-      tetrahedron.rotation.y += radiansPerSecond * delta;
-
-      tetrahedron.position.x = Math.cos(timestamp * 2) * 9;
-      tetrahedron.position.y = Math.sin(timestamp * 2) * 9;
-    }
-
-    return tetrahedron;
-  }*/
-
-  /**
    * Make line between points
    * @returns {*}
    */
   makeLineBetweenPoints() {
-    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 10, transparent: true, opacity: .1 } );
+    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
     const lineGeo = new BufferGeometry().setFromPoints( points );
     const line = new Line( lineGeo, material );
 
@@ -430,5 +548,9 @@ const randomizeMatrix = function() {
 
   };
 }();
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
 
 export { Geometries };

@@ -28,7 +28,6 @@ test/
 # Maven
 target/
 dist/
-backup/
 
 # JetBrains IDE
 .idea/
