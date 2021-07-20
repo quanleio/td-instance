@@ -3,6 +3,7 @@ import {
   TetrahedronBufferGeometry,
   IcosahedronBufferGeometry,
   OctahedronBufferGeometry,
+  TubeBufferGeometry,
   SphereBufferGeometry,
   BufferGeometry,
   InstancedBufferGeometry,
@@ -10,12 +11,14 @@ import {
   MeshStandardMaterial,
   LineBasicMaterial,
   RawShaderMaterial,
+  MeshLambertMaterial,
   TextureLoader,
   Object3D,
   Line,
   Mesh,
   InstancedMesh,
   Points,
+  CatmullRomCurve3,
   InstancedBufferAttribute,
   Float32BufferAttribute,
   MathUtils,
@@ -281,7 +284,6 @@ class Geometries {
   createBranch( branch, data ) {
 
     const matrix = new Matrix4();
-    // let branchs=[];
     const geometry = new SphereBufferGeometry(.2, 32);
     let instancedDan;
 
@@ -291,6 +293,7 @@ class Geometries {
         const materialDanA = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
         instancedDan = new InstancedMesh(geometry, materialDanA, danACount);
         instancedDan.type = "InstancedMesh";
+        let pointsA=[];
 
         for (let i = 0; i < danACount; i++) {
           let inst = data[i];
@@ -298,66 +301,137 @@ class Geometries {
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
           // points.push(pos);
+          pointsA.push(pos);
 
           // Enable bloom layers
           instancedDan.layers.enable(1);
         }
+
+        let tubeA = this.addTube(pointsA);
+        instancedDan.add(tubeA);
+        tubeA.matrixAutoUpdate = false;
+
+        // console.error(matrix, tube.matrix);
+        // tube.matrixWorld = matrix * tube.matrix;
+
         break;
       case 'danB':
         let danBCount = data.length;
         const materialDanB = new MeshStandardMaterial({ color: new Color(0xF2C811).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
         instancedDan = new InstancedMesh(geometry, materialDanB, danBCount);
         instancedDan.type = "InstancedMesh";
+        let pointsB =[];
 
         for (let i = 0; i < danBCount; i++) {
           let inst = data[i];
           let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
+          // points.push(pos);
+          pointsB.push(pos);
 
           // Enable bloom layers
           instancedDan.layers.enable(1);
         }
+
+        let tubeB = this.addTube(pointsB);
+        instancedDan.add(tubeB);
+        tubeB.matrixAutoUpdate = false;
         break;
       case 'danC':
         let danCCount = data.length;
         const materialDanC = new MeshStandardMaterial({ color: new Color(0x006bff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
         instancedDan = new InstancedMesh(geometry, materialDanC, danCCount);
         instancedDan.type = "InstancedMesh";
+        let pointsC = [];
 
         for (let i = 0; i < danCCount; i++) {
           let inst = data[i];
           let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
+          pointsC.push(pos)
 
           // Enable bloom layers
           instancedDan.layers.enable(1);
         }
+        let tubeC = this.addTube(pointsC);
+        instancedDan.add(tubeC);
+        tubeC.matrixAutoUpdate = false;
         break;
       case 'danD':
         let danDCount = data.length;
         const materialDanD = new MeshStandardMaterial({ color: new Color(0xffffff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
         instancedDan = new InstancedMesh(geometry, materialDanD, danDCount);
         instancedDan.type = "InstancedMesh";
+        let pointsD =[];
 
         for (let i = 0; i < danDCount; i++) {
           let inst = data[i];
           let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
+          pointsD.push(pos)
 
           // Enable bloom layers
           instancedDan.layers.enable(1);
         }
+        let tubeD = this.addTube(pointsD);
+        instancedDan.add(tubeD);
+        tubeD.matrixAutoUpdate = false;
+
         break;
     }
+
+
 
     instancedDan.tick = (delta) => {
       // instancedDan.rotation.y += radiansPerSecond * delta;
     }
 
     return instancedDan;
+  }
+
+  addTube(_points) {
+
+    // const pipeSpline = new CatmullRomCurve3( [
+    //   new Vector3( 0, 10, - 10 ),
+    //   new Vector3( 10, 0, - 10 ),
+    //   new Vector3( 20, 0, 0 ),
+    //   new Vector3( 30, 0, 10 ),
+    //   new Vector3( 30, 0, 20 ),
+    //   new Vector3( 20, 0, 30 ),
+    //   new Vector3( 10, 0, 30 ),
+    //   new Vector3( 0, 0, 30 ),
+    // ] );
+
+    console.error(_points);
+    // const pipeSpline = new CatmullRomCurve3( [
+    //   new Vector3( 0, 0, 0 ),
+    //   new Vector3( -0.023828517645597458, 0.9530288577079773, 0.11299587041139603 ),
+    //   new Vector3( -0.047657035291194916, 1.9060577154159546, 0.22599174082279205 ),
+    //   new Vector3( -0.08095603436231613, 2.8443384170532227, 0.42629188299179077 ),
+    //   new Vector3( -0.11425503343343735, 3.7826192378997803, 0.6265920400619507 ),
+    //   // new Vector3( 20, 0, 30 ),
+    //   // new Vector3( 10, 0, 30 ),
+    //   // new Vector3( 0, 0, 30 ),
+    // ] );
+
+    const pipeSpline = new CatmullRomCurve3( _points );
+    const params = {
+      spline: 'PipeSpline',
+      extrusionSegments: 100,
+      radiusSegments: 10,
+      closed: false,
+    };
+
+    const tubeGeometry = new TubeBufferGeometry( pipeSpline, params.extrusionSegments, .03, params.radiusSegments, params.closed );
+    const material = new MeshLambertMaterial( { color: 0xff00ff } );
+
+    const tube = new Mesh( tubeGeometry, material );
+    tube.scale.setScalar(0.1/10);
+
+    return tube;
   }
 
   /**

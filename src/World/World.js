@@ -47,15 +47,15 @@ class World {
     //   loop.updatables.push(cube);
     // })
 
-    const particles = geometryShape.createParticles();
-    scene.add(particles);
-    loop.updatables.push(particles);
-
-    const instancedShapes = geometryShape.instanceShapes();
-    instancedShapes.forEach(shape => {
-      scene.add(shape);
-      loop.updatables.push(shape);
-    })
+    // const particles = geometryShape.createParticles();
+    // scene.add(particles);
+    // loop.updatables.push(particles);
+    //
+    // const instancedShapes = geometryShape.instanceShapes();
+    // instancedShapes.forEach(shape => {
+    //   scene.add(shape);
+    //   loop.updatables.push(shape);
+    // })
 
     geometryShape.makeTree().then(branch => {
       branch.forEach(_branch => {
@@ -75,9 +75,9 @@ class World {
     //   scene.add(_model);
     // })
 
-    const line = geometryShape.makeLineBetweenPoints();
-    scene.add(line);
-    loop.updatables.push(line);
+    // const line = geometryShape.makeLineBetweenPoints();
+    // scene.add(line);
+    // loop.updatables.push(line);
 
     // Set background for scene as image
     let pmremGenerator = new PMREMGenerator( renderer );
