@@ -5,9 +5,9 @@ import {createScene} from './components/scene.js';
 import {loadSakura, loadSuzanne} from './components/model.js';
 import { createDirLight, createHemiLight} from './components/lights.js';
 import { Geometries } from './components/Geometries.js';
-import { Tree } from './components/Tree.js';
-import {createRenderer} from './systems/renderer.js';
-import {createControl} from './systems/controls.js';
+import { ProceduralTree } from './components/ProceduralTree.js';
+import { createRenderer} from './systems/renderer.js';
+import { createControl} from './systems/controls.js';
 import {Loop} from './systems/Loop.js';
 import {Resizer} from './systems/Resizer.js';
 import {Ray} from './systems/Ray.js';
@@ -59,13 +59,18 @@ class World {
       loop.updatables.push(shape);
     })
 
-    // tree
-    new Tree().makeTree().then( branch => {
-      branch.forEach(_branch => {
-        scene.add(_branch);
-        loop.updatables.push(_branch);
-      })
-    })
+    // tree from td json
+    // new Tree().makeTree().then( branch => {
+    //   branch.forEach(_branch => {
+    //     scene.add(_branch);
+    //     loop.updatables.push(_branch);
+    //   })
+    // })
+
+    // proctree.js
+    const tree = new ProceduralTree().createTree();
+    scene.add(tree);
+    loop.updatables.push(tree);
 
     console.warn(scene)
 

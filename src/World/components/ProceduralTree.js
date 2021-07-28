@@ -1,18 +1,105 @@
 import {
   SphereBufferGeometry,
   TubeBufferGeometry,
+  BufferAttribute,
+  BufferGeometry,
   MeshStandardMaterial,
   MeshLambertMaterial,
+  TextureLoader,
   InstancedMesh,
   Mesh,
+  Group,
   Matrix4,
   Color,
   Vector3,
   CatmullRomCurve3
 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-class Tree {
+import { Tree } from '../../../vendor2/proctree.js'
+
+const DEFAULT_CONFIG = {
+  // proctree
+  seed: 256,                      // how many types of tree to generate when reloading
+  segments: 6,                    // segment to make cylinder trunk, default is 6
+  levels: 5,                      // how many branches in each branch
+  vMultiplier: 2.36,
+  twigScale: 0.39,
+
+  // branch
+  initalBranchLength: 0.49,
+  lengthFalloffFactor: 0.85,
+  lengthFalloffPower: 0.99,
+  clumpMax: 0.454,               // draw branches up and down
+  clumpMin: 0.404,              // draw branches up and down
+  branchFactor: 2.45,
+  dropAmount: -0.1,              // ratio to draw branch down
+  growAmount: 0.235,            // ratio to draw branch up
+  sweepAmount: 0.01,
+
+  // trunk
+  maxRadius: 0.139,             // max radius for trunk
+  climbRate: 0.371,            // distance between branches
+  trunkKink: 0.093,
+  treeSteps: 5,
+  taperRate: 0.947,
+  radiusFalloffRate: 0.73,       // radius of branches
+  twistRate: 3.02,
+  trunkLength: 1.4,             // height of trunk
+
+  // custom
+  treeColor: 0x9d7362,
+  twigColor: 0x68AA55
+}
+
+class ProceduralTree {
 
   constructor() {
+
+    this.config = DEFAULT_CONFIG;
+    this.textureLoader = new TextureLoader();
+    this.treeMaterial = new MeshStandardMaterial({
+      color: this.config.treeColor,
+      roughness: 1.0,
+      metalness: 0.0
+    });
+    this.twigMaterial = new MeshStandardMaterial({
+      color: this.config.twigColor,
+      roughness: 1.0,
+      metalness: 0.0,
+      map: this.textureLoader.load('./assets/twig-3.png'),
+      alphaTest: 0.9
+    });
+  }
+
+  createTree () {
+    const tree = new Tree(this.config);
+
+    const treeGeometry = new BufferGeometry();
+    treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
+    treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
+    treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
+    treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
+
+    const twigGeometry = new BufferGeometry();
+    twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
+    twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
+    twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
+    twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
+
+    const treeGroup = new Group();
+    const trunk = new Mesh(treeGeometry, this.treeMaterial);
+    const twig = new Mesh(twigGeometry, this.twigMaterial);
+    twig.layers.enable(1);
+    treeGroup.add(trunk, twig);
+
+    treeGroup.position.set(0, -22, 0)
+    treeGroup.scale.setScalar(8)
+    treeGroup.rotateY(Math.PI/180 * 60)
+
+    treeGroup.tick = () => {
+
+    }
+
+    return treeGroup;
   }
 
   /**
@@ -231,4 +318,24 @@ class Tree {
 
 }
 
-export { Tree }
+function createFloatAttribute (array, itemSize) {
+  const typedArray = new Float32Array(Tree.flattenArray(array));
+  return new BufferAttribute(typedArray, itemSize);
+}
+
+function createIntAttribute (array, itemSize) {
+  const typedArray = new Uint16Array(Tree.flattenArray(array));
+  return new BufferAttribute(typedArray, itemSize);
+}
+
+function normalizeAttribute (attribute) {
+  var v = new Vector3();
+  for (var i = 0; i < attribute.count; i++) {
+    v.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
+    v.normalize();
+    attribute.setXYZ(i, v.x, v.y, v.z);
+  }
+  return attribute;
+}
+
+export { ProceduralTree }
