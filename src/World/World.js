@@ -3,8 +3,9 @@ import { RGBELoader } from '../../vendor2/RGBELoader.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
 import {loadSakura, loadSuzanne} from './components/model.js';
-import {createDirLight, createHemiLight} from './components/lights.js';
+import { createDirLight, createHemiLight} from './components/lights.js';
 import { Geometries } from './components/Geometries.js';
+import { Tree } from './components/Tree.js';
 import {createRenderer} from './systems/renderer.js';
 import {createControl} from './systems/controls.js';
 import {Loop} from './systems/Loop.js';
@@ -27,9 +28,6 @@ class World {
     const sceneComposer = new SceneComposer(scene, camera, renderer);
     composer = sceneComposer.getComposers();
 
-    // loop
-    loop = new Loop(camera, scene, renderer, sceneComposer);
-
     const hemiLight = createHemiLight();
     const dirLight = createDirLight();
     scene.add(dirLight, hemiLight);
@@ -37,19 +35,23 @@ class World {
     // 3d geometries
     const geometryShape = new Geometries();
 
+    // loop
+    loop = new Loop(camera, scene, renderer, sceneComposer);
+
     /*const shape = geometryShape.generateShapes();
     scene.add(shape);
     loop.updatables.push(shape);*/
 
-    // const cubes = geometryShape.randomCube();
+    // const cubes = geometryShape.floatingCube();
     // cubes.forEach(cube => {
     //   scene.add(cube);
     //   loop.updatables.push(cube);
     // })
 
-    // const particles = geometryShape.createParticles();
-    // scene.add(particles);
-    // loop.updatables.push(particles);
+    // particle
+    const particles = geometryShape.createParticles();
+    scene.add(particles);
+    loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
     instancedShapes.forEach(shape => {
@@ -58,12 +60,14 @@ class World {
     })
 
     // tree
-    // geometryShape.makeTree().then(branch => {
-    //   branch.forEach(_branch => {
-    //     scene.add(_branch)
-    //     loop.updatables.push(_branch);
-    //   })
-    // });
+    new Tree().makeTree().then( branch => {
+      branch.forEach(_branch => {
+        scene.add(_branch);
+        loop.updatables.push(_branch);
+      })
+    })
+
+    console.warn(scene)
 
     // Suzanne model
     // loadSuzanne().then(_model => {
@@ -75,10 +79,6 @@ class World {
     // loadSakura().then(_model => {
     //   scene.add(_model);
     // })
-
-    // const line = geometryShape.makeLineBetweenPoints();
-    // scene.add(line);
-    // loop.updatables.push(line);
 
     // Set background for scene as image
     let pmremGenerator = new PMREMGenerator( renderer );
@@ -108,6 +108,14 @@ class World {
     // resize
     new Resizer(camera, renderer, composer);
   }
+
+  // autoRandom() {
+  //   setTimeout(() => {
+  //     scene.add(randomCube)
+  //     loop.updatables.push(randomCube);
+  //     console.error('random cube');
+  //   }, 1000);
+  // }
 
   render() {
     renderer.render(scene, camera); // draw a single frame
