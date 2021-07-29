@@ -1,15 +1,16 @@
-import { Vector2, Layers, ShaderMaterial, MeshBasicMaterial } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+import { Vector2, Layers, ShaderMaterial, MeshBasicMaterial,Vector3 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 import { RenderPass } from '../../../vendor2/RenderPass.js';
 import { UnrealBloomPass } from '../../../vendor2/UnrealBloomPass.js';
 import { EffectComposer} from '../../../vendor2/EffectComposer.js';
 import { ShaderPass } from '../../../vendor2/ShaderPass.js';
 
 const params = {
-  exposure:  1,
-  bloomStrength: 1.2,
+  exposure:       1,
+  bloomStrength:  1.2,
   bloomThreshold: 0,
-  bloomRadius: 0,
+  bloomRadius:    0,
 };
+const redBloomTintColor = [ new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ) ];
 const darkMaterial = new MeshBasicMaterial({ color: "black" });
 const materials = {};
 const bloomLayer = new Layers();
@@ -17,10 +18,9 @@ bloomLayer.set( 1 );
 let sceneComposer, bloomComposer;
 
 class SceneComposer {
-
   constructor(_scene, _camera, _renderer) {
-    this.scene = _scene;
-    this.camera = _camera;
+    this.scene    = _scene;
+    this.camera   = _camera;
     this.renderer = _renderer;
 
     const renderScene = new RenderPass(this.scene, this.camera);
@@ -28,6 +28,9 @@ class SceneComposer {
     bloomPass.threshold = params.bloomThreshold;
     bloomPass.strength  = params.bloomStrength;
     bloomPass.radius    = params.bloomRadius;
+
+    // Change color for blooming to red
+    // bloomPass.bloomTintColors = [ new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ) ];
 
     bloomComposer = new EffectComposer(this.renderer);
     bloomComposer.renderToScreen = false;

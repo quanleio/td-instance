@@ -41,7 +41,7 @@ class Geometries {
    * @returns {*}
    */
   createParticles() {
-    const particleCount = 300;
+    const particleCount = 1000;
     const radius = 10;
     const positions = [];
     const colors = [];
@@ -66,10 +66,9 @@ class Geometries {
     const geometry = new BufferGeometry();
     for ( let i = 0; i < particleCount; i ++ ) {
 
-      const randomX = ( Math.random() * 4 - 2 ) * radius;
-      const randomY = ( Math.random() * 4 - 2 ) * radius;
-      const randomZ = ( Math.random() * 4 - 2 ) * radius;
-
+      const randomX = ( Math.random() * 6 - 3 ) * radius;
+      const randomY = ( Math.random() * 6 - 3 ) * radius;
+      const randomZ = ( Math.random() * 6 - 3 ) * radius;
       positions.push( randomX );
       positions.push( randomY );
       positions.push( randomZ );
@@ -88,9 +87,9 @@ class Geometries {
     particleSystem.sortParticles = true;
 
     // add lines
-    let line = this.addLine(points);
-    particleSystem.add(line);
-    line.matrixAutoUpdate = false;
+    // let line = this.addLine(points);
+    // particleSystem.add(line);
+    // line.matrixAutoUpdate = false;
 
     // Dont apply bloom for particles
     particleSystem.layers.enable(0);
@@ -138,14 +137,9 @@ class Geometries {
         mesh.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
 
         // position
-        const randomX = ( Math.random() * 4 - 2 ) * 10;
-        const randomY = ( Math.random() * 4 - 2 ) * 10;
+        const randomX = ( Math.random() * 5 - 5/2 ) * 10;
+        const randomY = ( Math.random() * 2 - 1 ) * 20;
         const randomZ = ( Math.random() * 4 - 2 ) * 10;
-
-        // genertate position area in cube shape
-        // let randomX = Math.random()*40 - 20;
-        // let randomY = Math.random()*30 - 10;
-        // let randomZ = Math.random()*20 - 10;
         matrix.setPosition( randomX, randomY , randomZ );
         mesh.setMatrixAt( i, matrix );
 
@@ -163,9 +157,9 @@ class Geometries {
         mesh.layers.enable(1);
       }
 
-      let line = this.addLine(points);
-      mesh.add(line);
-      line.matrixAutoUpdate = false;
+      // let line = this.addLine(points);
+      // mesh.add(line);
+      // line.matrixAutoUpdate = false;
 
       mesh.tick = (delta) => {
 
@@ -240,10 +234,12 @@ class Geometries {
   createMesh() {
     let instanedMeshs = [];
     const material = new MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
+    const count = 20;
+    const size = 0.6;
 
     // tetrahedron
-    const tetraGeo = new TetrahedronBufferGeometry(0.8, 0);
-    let tetraShapes = new InstancedMesh( tetraGeo, material, 10 );
+    const tetraGeo = new TetrahedronBufferGeometry(size, 0);
+    let tetraShapes = new InstancedMesh( tetraGeo, material, count );
     tetraShapes.type = "InstancedMesh";
     tetraShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
     tetraShapes.castShadow = true;
@@ -251,8 +247,8 @@ class Geometries {
     // instanedMeshs.push(tetraShapes);
 
     // Octahedron
-    const octahedronGeo = new OctahedronBufferGeometry(0.8, 0);
-    let octahedronGeoShapes = new InstancedMesh( octahedronGeo, material, 10 );
+    const octahedronGeo = new OctahedronBufferGeometry(size, 0);
+    let octahedronGeoShapes = new InstancedMesh( octahedronGeo, material, count );
     octahedronGeoShapes.type = "InstancedMesh";
     octahedronGeoShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
     octahedronGeoShapes.castShadow = true;
@@ -260,8 +256,8 @@ class Geometries {
     instanedMeshs.push(octahedronGeoShapes);
 
     // Icosahedron
-    const icosahedronGeo = new IcosahedronBufferGeometry(0.8, 0);
-    let icosahedronGeoShapes = new InstancedMesh( icosahedronGeo, material, 10 );
+    const icosahedronGeo = new IcosahedronBufferGeometry(size, 0);
+    let icosahedronGeoShapes = new InstancedMesh( icosahedronGeo, material, count );
     icosahedronGeoShapes.type = "InstancedMesh";
     icosahedronGeoShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
     icosahedronGeoShapes.castShadow = true;
@@ -269,8 +265,8 @@ class Geometries {
     instanedMeshs.push(icosahedronGeoShapes);
 
     // box
-    const boxGeo = new BoxBufferGeometry(0.8, 0.8, 0.8);
-    let boxShapes = new InstancedMesh( boxGeo, material, 10 );
+    const boxGeo = new BoxBufferGeometry(size, size, size);
+    let boxShapes = new InstancedMesh( boxGeo, material, count );
     boxShapes.type = "InstancedMesh";
     boxShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
     boxShapes.castShadow = true;

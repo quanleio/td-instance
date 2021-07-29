@@ -10,7 +10,7 @@ function createCamera() {
 
   const camera = new PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
   // camera.position.set( - 1, 1.5, 30 );
-  camera.position.set( - 1, 0, 50 );
+  camera.position.set( - 1, 0, 60 );
   camera.lookAt( 0, 1, 0 );
 
   return camera;

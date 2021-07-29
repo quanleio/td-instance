@@ -108,7 +108,7 @@ function makeInstanceWithRandomPos(_buffGeo) {
   return new Promise((resolve, reject) => {
     const matrix = new Matrix4();
     const color = new Color();
-    const count = 3;
+    const count = 1000;
     const dummy = new Object3D();
     let points = [];
 
@@ -134,8 +134,6 @@ function makeInstanceWithRandomPos(_buffGeo) {
       // Enable bloom layers
       // if (Math.random() < 0.25) instancedMesh.layers.enable(1);
     }
-
-    console.error(points);
 
     resolve(instancedMesh);
   });
@@ -164,7 +162,7 @@ const randomizeMatrix = function() {
 
     quaternion.setFromEuler(rotation);
 
-    scale.x = scale.y = scale.z = Math.random() * 1;
+    scale.x = scale.y = scale.z = Math.random() * 1/2;
 
     matrix.compose(position, quaternion, scale);
 

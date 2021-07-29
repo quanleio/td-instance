@@ -1,5 +1,6 @@
 import {
   SphereBufferGeometry,
+  BoxBufferGeometry,
   TubeBufferGeometry,
   BufferAttribute,
   BufferGeometry,
@@ -18,36 +19,36 @@ import { Tree } from '../../../vendor2/proctree.js'
 
 const DEFAULT_CONFIG = {
   // proctree
-  seed: 256,                      // how many types of tree to generate when reloading
-  segments: 6,                    // segment to make cylinder trunk, default is 6
-  levels: 5,                      // how many branches in each branch
-  vMultiplier: 2.36,
-  twigScale: 0.39,
+  seed:                 1,                  // how many types of tree to generate when reloading, default is 256
+  segments:             6,                  // segment to make cylinder trunk, default is 6
+  levels:               10,                 // how many branches in each branch
+  vMultiplier:          2.36,
+  twigScale:            0.39,
 
   // branch
-  initalBranchLength: 0.49,
-  lengthFalloffFactor: 0.85,
-  lengthFalloffPower: 0.99,
-  clumpMax: 0.454,               // draw branches up and down
-  clumpMin: 0.404,              // draw branches up and down
-  branchFactor: 2.45,
-  dropAmount: -0.1,              // ratio to draw branch down
-  growAmount: 0.235,            // ratio to draw branch up
-  sweepAmount: 0.01,
+  initalBranchLength:   1, //0.49,
+  lengthFalloffFactor:  0.85,
+  lengthFalloffPower:   0.99,
+  clumpMax:             0.454,             // draw branches up and down
+  clumpMin:             0.404,             // draw branches up and down
+  branchFactor:         2.45,
+  dropAmount:           0.1/4,             // ratio to draw branch down, default is -0.1
+  growAmount:           0.235,             // ratio to draw branch up
+  sweepAmount:          0.01,
 
   // trunk
-  maxRadius: 0.139,             // max radius for trunk
-  climbRate: 0.371,            // distance between branches
-  trunkKink: 0.093,
-  treeSteps: 5,
-  taperRate: 0.947,
-  radiusFalloffRate: 0.73,       // radius of branches
-  twistRate: 3.02,
-  trunkLength: 1.4,             // height of trunk
+  maxRadius:            0.1/8,             // max radius for trunk, default is 0.139
+  climbRate:            0.371,             // distance between branches
+  trunkKink:            0.093,
+  treeSteps:            5,
+  taperRate:            0.947,
+  radiusFalloffRate:    0.73,             // radius of branches
+  twistRate:            3.02,
+  trunkLength:          1,                // height of trunk
 
   // custom
-  treeColor: 0x9d7362,
-  twigColor: 0x68AA55
+  // treeColor:            0x9d7362,         // brown
+  twigColor:            0x68AA55
 }
 
 class ProceduralTree {
@@ -56,11 +57,11 @@ class ProceduralTree {
 
     this.config = DEFAULT_CONFIG;
     this.textureLoader = new TextureLoader();
-    this.treeMaterial = new MeshStandardMaterial({
-      color: this.config.treeColor,
-      roughness: 1.0,
-      metalness: 0.0
-    });
+    // this.treeMaterial = new MeshStandardMaterial({
+    //   color: this.config.treeColor,
+    //   roughness: 1.0,
+    //   metalness: 0.1,
+    // });
     this.twigMaterial = new MeshStandardMaterial({
       color: this.config.twigColor,
       roughness: 1.0,
@@ -70,7 +71,11 @@ class ProceduralTree {
     });
   }
 
-  createTree () {
+  /**
+   * Create tree with proctree.js
+   * @returns {*}
+   */
+  createTree (colorHex) {
     const tree = new Tree(this.config);
 
     const treeGeometry = new BufferGeometry();
@@ -80,26 +85,47 @@ class ProceduralTree {
     treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
 
     const twigGeometry = new BufferGeometry();
+
+    let colorValue = parseInt ( colorHex.replace("#","0x"), 16 );
+    let colored = new Color( colorValue );
+
+    // Random Color
+    // let color = new Color( 0xffffff );
+    // color.setHex( Math.random() * 0xffffff );
+    const treeMaterial = new MeshStandardMaterial({
+      color: colored,
+      roughness: 1.0,
+      metalness: 0.1,
+    });
     twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
     twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
     twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
     twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
 
     const treeGroup = new Group();
-    const trunk = new Mesh(treeGeometry, this.treeMaterial);
-    const twig = new Mesh(twigGeometry, this.twigMaterial);
-    twig.layers.enable(1);
-    treeGroup.add(trunk, twig);
+    const trunk = new Mesh(treeGeometry, treeMaterial);
+    trunk.name = 'TRUNK';
+    trunk.layers.enable(1);
 
-    treeGroup.position.set(0, -22, 0)
+    // const twig = new Mesh(twigGeometry, this.twigMaterial);
+    // twig.name = 'TWIG';
+    // twig.layers.enable(1);
+    treeGroup.add(trunk);
+
+    // treeGroup.position.set(0, -27, 0)
     treeGroup.scale.setScalar(8)
-    treeGroup.rotateY(Math.PI/180 * 60)
+    // treeGroup.rotateY(Math.PI/180 * 100)
 
     treeGroup.tick = () => {
 
     }
 
     return treeGroup;
+  }
+
+  createNewBranch(_tree) {
+
+    console.warn(_tree.children[0])
   }
 
   /**

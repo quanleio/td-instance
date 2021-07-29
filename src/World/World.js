@@ -68,11 +68,19 @@ class World {
     // })
 
     // proctree.js
-    const tree = new ProceduralTree().createTree();
-    scene.add(tree);
-    loop.updatables.push(tree);
+    let procTree = new ProceduralTree();
+    const tree1 = procTree.createTree('0x9d7362'); tree1.position.set(-30, -27, 0); tree1.rotateY(Math.PI/180 * 100);
+    const tree2 = procTree.createTree('0xDF1019'); tree2.position.set(-15, -27, 0); tree2.rotateY(Math.PI/180 * 80);
+    const tree3 = procTree.createTree('0x1D903F'); tree3.position.set(10, -27, 0);  tree3.rotateY(Math.PI/180 * 60);
+    const tree4 = procTree.createTree('0x0000B3'); tree4.position.set(20, -27, 0);  tree4.rotateY(Math.PI/180 * 40);
 
-    console.warn(scene)
+    scene.add(tree1, tree2, tree3, tree4);
+    loop.updatables.push(tree1, tree2, tree3, tree4);
+
+    // TODO: create new branch for Tree
+    setInterval(() => {
+      // procTree.createNewBranch(tree);
+    }, 5000)
 
     // Suzanne model
     // loadSuzanne().then(_model => {
@@ -84,6 +92,8 @@ class World {
     // loadSakura().then(_model => {
     //   scene.add(_model);
     // })
+
+    console.error(scene)
 
     // Set background for scene as image
     let pmremGenerator = new PMREMGenerator( renderer );
