@@ -20,7 +20,7 @@ class Ray {
 
       let objects = [];
       this.scene.children.forEach(child => {
-        if (child.type === 'Line') return;
+        if (child.type === 'Line' || child.name === 'TRUNK') return;
         objects.push(child);
       })
 

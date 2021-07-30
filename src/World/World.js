@@ -69,18 +69,49 @@ class World {
 
     // proctree.js
     let procTree = new ProceduralTree();
-    const tree1 = procTree.createTree('0x9d7362'); tree1.position.set(-30, -27, 0); tree1.rotateY(Math.PI/180 * 100);
-    const tree2 = procTree.createTree('0xDF1019'); tree2.position.set(-15, -27, 0); tree2.rotateY(Math.PI/180 * 80);
-    const tree3 = procTree.createTree('0x1D903F'); tree3.position.set(10, -27, 0);  tree3.rotateY(Math.PI/180 * 60);
-    const tree4 = procTree.createTree('0x0000B3'); tree4.position.set(20, -27, 0);  tree4.rotateY(Math.PI/180 * 40);
+    // const tree1 = procTree.createTree(10); tree1.position.set(-30, -27, 0); tree1.rotateY(Math.PI/180 * 100);
+    // const tree2 = procTree.createTree(10); tree2.position.set(-15, -27, 0); tree2.rotateY(Math.PI/180 * 80);
+    // const tree3 = procTree.createTree(10); tree3.position.set(10, -27, 0);  tree3.rotateY(Math.PI/180 * 60);
+    // const tree4 = procTree.createTree(10); tree4.position.set(20, -27, 0);  tree4.rotateY(Math.PI/180 * 40);
+    // scene.add(tree2);
+    // loop.updatables.push(tree1, tree2, tree3, tree4);
 
-    scene.add(tree1, tree2, tree3, tree4);
-    loop.updatables.push(tree1, tree2, tree3, tree4);
+    const groupTree1 = procTree.createTreeGroup('groupTree1', 6 );
+    const groupTree2 = procTree.createTreeGroup('groupTree2', 6 );
+    const groupTree3 = procTree.createTreeGroup('groupTree3', 6 );
+    const groupTree4 = procTree.createTreeGroup('groupTree4', 6 );
+    scene.add(groupTree1, groupTree2, groupTree3, groupTree4);
+    loop.updatables.push(groupTree1, groupTree2, groupTree3, groupTree4);
 
-    // TODO: create new branch for Tree
-    setInterval(() => {
-      // procTree.createNewBranch(tree);
-    }, 5000)
+    let level = 3;
+    setTimeout(() => {
+      setInterval(() => {
+        level = level + .1;
+        if (level <= 8) {
+
+          scene.children.forEach(t => {
+            if (t.name === 'TRUNK') scene.remove(t); // remove old trees
+          })
+
+          // create new trees
+          // const tree1 = procTree.createTree(level.toExponential(2), '0xFEFEB1');
+          // tree1.position.set(-30, -27, 0); tree1.rotateY(Math.PI/180 * 100);
+
+          // let tree2 = procTree.createTree(level.toExponential(2), '0xfc4c4e');
+          // tree2.position.set(-15, -27, 0);
+          // tree2.rotateY(Math.PI/180 * 80);
+
+          // const tree3 = procTree.createTree(level.toExponential(2), '0x40DFA0');
+          // tree3.position.set(10, -27, 0);  tree3.rotateY(Math.PI/180 * 60);
+
+          // const tree4 = procTree.createTree(level.toExponential(2), '0xFF7AE9');
+          // tree4.position.set(20, -27, 0);  tree4.rotateY(Math.PI/180 * 40);
+
+          // scene.add(groupTree2);
+          // loop.updatables.push(groupTree2);
+        }
+      }, 50)
+    }, 1000)
 
     // Suzanne model
     // loadSuzanne().then(_model => {
@@ -123,14 +154,6 @@ class World {
     // resize
     new Resizer(camera, renderer, composer);
   }
-
-  // autoRandom() {
-  //   setTimeout(() => {
-  //     scene.add(randomCube)
-  //     loop.updatables.push(randomCube);
-  //     console.error('random cube');
-  //   }, 1000);
-  // }
 
   render() {
     renderer.render(scene, camera); // draw a single frame

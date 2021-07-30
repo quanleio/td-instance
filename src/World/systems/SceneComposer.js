@@ -6,7 +6,7 @@ import { ShaderPass } from '../../../vendor2/ShaderPass.js';
 
 const params = {
   exposure:       1,
-  bloomStrength:  1.2,
+  bloomStrength:  1, //1.2,
   bloomThreshold: 0,
   bloomRadius:    0,
 };

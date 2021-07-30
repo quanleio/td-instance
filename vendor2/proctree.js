@@ -62,7 +62,7 @@ Tree.prototype.properties = {
   taperRate: 0.95,
   twistRate: 13,
   segments: 6,
-  levels: 3,
+  levels: 1, //3,
   sweepAmount: 0,
   initalBranchLength: 0.85,
   trunkLength: 2.5,
@@ -562,26 +562,18 @@ Branch.prototype.split = function (level, steps, properties, l1, l2) {
     newdir2 = normalize([Math.sin(angle), r, Math.cos(angle)]);
   }
 
-  var growAmount =
-    ((level * level) / (properties.levels * properties.levels)) *
-    properties.growAmount;
+  var growAmount = ((level * level) / (properties.levels * properties.levels)) * properties.growAmount;
   var dropAmount = rLevel * properties.dropAmount;
   var sweepAmount = rLevel * properties.sweepAmount;
   newdir = normalize(addVec(newdir, [sweepAmount, dropAmount + growAmount, 0]));
-  newdir2 = normalize(
-    addVec(newdir2, [sweepAmount, dropAmount + growAmount, 0])
-  );
+  newdir2 = normalize( addVec(newdir2, [sweepAmount, dropAmount + growAmount, 0]));
 
   var head0 = addVec(so, scaleVec(newdir, this.length));
   var head1 = addVec(so, scaleVec(newdir2, this.length));
   this.child0 = new Branch(head0, this);
   this.child1 = new Branch(head1, this);
-  this.child0.length =
-    Math.pow(this.length, properties.lengthFalloffPower) *
-    properties.lengthFalloffFactor;
-  this.child1.length =
-    Math.pow(this.length, properties.lengthFalloffPower) *
-    properties.lengthFalloffFactor;
+  this.child0.length = Math.pow(this.length, properties.lengthFalloffPower) * properties.lengthFalloffFactor;
+  this.child1.length = Math.pow(this.length, properties.lengthFalloffPower) * properties.lengthFalloffFactor;
   if (level > 0) {
     if (steps > 0) {
       this.child0.head = addVec(this.head, [

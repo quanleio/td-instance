@@ -1,11 +1,13 @@
 import {
   SphereBufferGeometry,
   BoxBufferGeometry,
+  CylinderBufferGeometry,
   TubeBufferGeometry,
   BufferAttribute,
   BufferGeometry,
   MeshStandardMaterial,
   MeshLambertMaterial,
+  MeshBasicMaterial,
   TextureLoader,
   InstancedMesh,
   Mesh,
@@ -13,42 +15,43 @@ import {
   Matrix4,
   Color,
   Vector3,
-  CatmullRomCurve3
+  CatmullRomCurve3,
+  MathUtils
 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 import { Tree } from '../../../vendor2/proctree.js'
 
 const DEFAULT_CONFIG = {
   // proctree
-  seed:                 1,                  // how many types of tree to generate when reloading, default is 256
-  segments:             6,                  // segment to make cylinder trunk, default is 6
-  levels:               10,                 // how many branches in each branch
+  seed:                 10,                  // how many types of tree to generate when reloading, default is 256
+  segments:             32,                  // segment to make cylinder trunk, default is 6
+  levels:               1,                 // how many branches in each branch
   vMultiplier:          2.36,
   twigScale:            0.39,
 
   // branch
   initalBranchLength:   1, //0.49,
-  lengthFalloffFactor:  0.85,
+  lengthFalloffFactor:  1, //0.85,
   lengthFalloffPower:   0.99,
-  clumpMax:             0.454,             // draw branches up and down
+  clumpMax:             0.454,             // draw branches up and down  0~0.5
   clumpMin:             0.404,             // draw branches up and down
   branchFactor:         2.45,
-  dropAmount:           0.1/4,             // ratio to draw branch down, default is -0.1
+  dropAmount:           -0.2,             // ratio to draw branch down, default is -0.1
   growAmount:           0.235,             // ratio to draw branch up
   sweepAmount:          0.01,
 
   // trunk
-  maxRadius:            0.1/8,             // max radius for trunk, default is 0.139
+  maxRadius:            0.1/3,             // max radius for trunk, default is 0.139
   climbRate:            0.371,             // distance between branches
   trunkKink:            0.093,
-  treeSteps:            5,
+  treeSteps:            13, //5,
   taperRate:            0.947,
   radiusFalloffRate:    0.73,             // radius of branches
   twistRate:            3.02,
-  trunkLength:          1,                // height of trunk
+  trunkLength:          10,                // height of trunk
 
   // custom
   // treeColor:            0x9d7362,         // brown
-  twigColor:            0x68AA55
+  // twigColor:            0x68AA55
 }
 
 class ProceduralTree {
@@ -62,21 +65,24 @@ class ProceduralTree {
     //   roughness: 1.0,
     //   metalness: 0.1,
     // });
-    this.twigMaterial = new MeshStandardMaterial({
-      color: this.config.twigColor,
-      roughness: 1.0,
-      metalness: 0.0,
-      map: this.textureLoader.load('./assets/twig-3.png'),
-      alphaTest: 0.9
-    });
+    // this.twigMaterial = new MeshStandardMaterial({
+    //   color: this.config.twigColor,
+    //   roughness: 1.0,
+    //   metalness: 0.0,
+    //   map: this.textureLoader.load('./assets/twig-3.png'),
+    //   alphaTest: 0.9
+    // });
   }
 
   /**
    * Create tree with proctree.js
    * @returns {*}
    */
-  createTree (colorHex) {
-    const tree = new Tree(this.config);
+  createTree (_randomConfig, colorHex) {
+
+    // this.config.levels = level;
+    // this.config.clumpMax = clumMax;
+    const tree = new Tree(_randomConfig);
 
     const treeGeometry = new BufferGeometry();
     treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
@@ -84,49 +90,236 @@ class ProceduralTree {
     treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
     treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
 
-    const twigGeometry = new BufferGeometry();
-
+    // fixed color
     let colorValue = parseInt ( colorHex.replace("#","0x"), 16 );
     let colored = new Color( colorValue );
 
     // Random Color
-    // let color = new Color( 0xffffff );
-    // color.setHex( Math.random() * 0xffffff );
+    // let randomColor = new Color( 0xffffff );
+    // randomColor.setHex( Math.random() * 0xffffff );
+    // colored.setHex( Math.random() * 0xffffff );
     const treeMaterial = new MeshStandardMaterial({
       color: colored,
       roughness: 1.0,
       metalness: 0.1,
+      transparent: true,
+      opacity: 0
     });
-    twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
-    twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
-    twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
-    twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
 
-    const treeGroup = new Group();
+    // const twigGeometry = new BufferGeometry();
+    // twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
+    // twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
+    // twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
+    // twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
+
+    // const treeGroup = new Group();
     const trunk = new Mesh(treeGeometry, treeMaterial);
     trunk.name = 'TRUNK';
     trunk.layers.enable(1);
+    trunk.scale.setScalar(2.7);
 
     // const twig = new Mesh(twigGeometry, this.twigMaterial);
     // twig.name = 'TWIG';
     // twig.layers.enable(1);
-    treeGroup.add(trunk);
+    // treeGroup.add(trunk, twig);
 
-    // treeGroup.position.set(0, -27, 0)
-    treeGroup.scale.setScalar(8)
-    // treeGroup.rotateY(Math.PI/180 * 100)
+    // trunk.tick = () => {
+    //   // trunk.material.opacity = 1 + Math.sin(new Date().getTime() * .0025);
+    //
+    //   // TDOO: Test Wind Effect
+    //  /* const now = performance.now();
+    //   const windStrength = Math.cos( now / 7000 ) * 20 + 40;
+    //   windForce.set( Math.sin( now / 2000 ), Math.cos( now / 3000 ), Math.sin( now / 1000 ) );
+    //   windForce.normalize();
+    //   windForce.multiplyScalar( windStrength );
+    //
+    //   let indx;
+    //   const normal = new Vector3();
+    //   const indices = treeGeometry.index;
+    //   const normals = treeGeometry.attributes.normal;
+    //   for ( let i = 0, il = indices.count; i < il; i += 3 ) {
+    //     for ( let j = 0; j < 3; j ++ ) {
+    //       indx = indices.getX( i + j );
+    //       normal.fromBufferAttribute( normals, indx );
+    //       tmpForce.copy( normal ).normalize().multiplyScalar( normal.dot( windForce ) );
+    //       // particles[ indx ].addForce( tmpForce );
+    //       normals[indx].addForce(tmpForce);
+    //     }
+    //   }*/
+    //
+    // }
 
-    treeGroup.tick = () => {
+    return trunk;
+  }
 
+  createTreeGroup(_groupName, level) {
+
+    // one group has 10 trees
+    let group = new Group();
+    group.name = _groupName;
+    const seed = 10;
+
+    switch (_groupName) {
+      case 'groupTree1':
+        for(let i = 1; i<=seed; i++) {
+          const RANDOM_CONFIG = {
+            // tree
+            seed:                 1,
+            segments:             16,
+            levels:               level,
+            vMultiplier:          2.36,
+            twigScale:            0.39,
+
+            // branch
+            initalBranchLength:   1,
+            lengthFalloffFactor:  1,
+            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
+            clumpMax:             MathUtils.randFloat(0, 1),
+            clumpMin:             MathUtils.randFloat(0, 0.9),
+            branchFactor:         MathUtils.randFloat(2, 4),
+            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
+            growAmount:           0.235,
+            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+
+            // trunk
+            maxRadius:            0.1/3,
+            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
+            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
+            treeSteps:            20,
+            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
+            radiusFalloffRate:    0.8,
+            twistRate:            MathUtils.randFloat(0, 10), //3.02,
+            trunkLength:          8
+          }
+          const tree = this.createTree(RANDOM_CONFIG, '0xFEFEB1');
+          tree.position.set(MathUtils.randFloat(-30, -28), -27, 0);
+          tree.rotation.y = Math.random() * 2 * Math.PI;
+          group.add(tree);
+        }
+        break;
+      case 'groupTree2':
+        for(let i = 1; i<=seed; i++) {
+          const RANDOM_CONFIG = {
+            // proctree
+            seed:                 1,
+            segments:             16,
+            levels:               level,
+            vMultiplier:          2.36,
+            twigScale:            0.39,
+
+            // branch
+            initalBranchLength:   1,
+            lengthFalloffFactor:  1,
+            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
+            clumpMax:             MathUtils.randFloat(0, 1),
+            clumpMin:             MathUtils.randFloat(0, 0.9),
+            branchFactor:         MathUtils.randFloat(2, 4),
+            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
+            growAmount:           0.235,
+            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+
+            // trunk
+            maxRadius:            0.1/3,
+            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
+            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
+            treeSteps:            20,
+            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
+            radiusFalloffRate:    0.8,
+            twistRate:            MathUtils.randFloat(0, 10), //3.02,
+            trunkLength:          8
+          }
+          const tree = this.createTree(RANDOM_CONFIG, '0xfc4c4e');
+          tree.position.set(MathUtils.randFloat(-10, -8), -27, -10);
+          tree.rotation.y = Math.random() * 2 * Math.PI;
+          group.add(tree);
+        }
+        break;
+      case 'groupTree3':
+        for(let i = 1; i<=seed; i++) {
+          const RANDOM_CONFIG = {
+            // proctree
+            seed:                 1,
+            segments:             16,
+            levels:               level,
+            vMultiplier:          2.36,
+            twigScale:            0.39,
+
+            // branch
+            initalBranchLength:   1,
+            lengthFalloffFactor:  1,
+            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
+            clumpMax:             MathUtils.randFloat(0, 1),
+            clumpMin:             MathUtils.randFloat(0, 0.9),
+            branchFactor:         MathUtils.randFloat(2, 4),
+            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
+            growAmount:           0.235,
+            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+
+            // trunk
+            maxRadius:            0.1/3,
+            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
+            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
+            treeSteps:            20,
+            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
+            radiusFalloffRate:    0.8,
+            twistRate:            MathUtils.randFloat(0, 10), //3.02,
+            trunkLength:          8
+          }
+          const tree = this.createTree(RANDOM_CONFIG, '0x40DFA0');
+          tree.position.set(MathUtils.randFloat(10, 12), -27, -10);
+          tree.rotation.y = Math.random() * 2 * Math.PI;
+          group.add(tree);
+        }
+        break;
+      case 'groupTree4':
+        for(let i = 1; i<=seed; i++) {
+          const RANDOM_CONFIG = {
+            // proctree
+            seed:                 1,
+            segments:             16,
+            levels:               level,
+            vMultiplier:          2.36,
+            twigScale:            0.39,
+
+            // branch
+            initalBranchLength:   1,
+            lengthFalloffFactor:  1,
+            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
+            clumpMax:             MathUtils.randFloat(0, 1),
+            clumpMin:             MathUtils.randFloat(0, 0.9),
+            branchFactor:         MathUtils.randFloat(2, 4),
+            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
+            growAmount:           0.235,
+            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+
+            // trunk
+            maxRadius:            0.1/3,
+            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
+            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
+            treeSteps:            20,
+            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
+            radiusFalloffRate:    0.8,
+            twistRate:            MathUtils.randFloat(0, 10), //3.02,
+            trunkLength:          8
+          }
+          const tree = this.createTree(RANDOM_CONFIG, '0xFF7AE9');
+          tree.position.set(MathUtils.randFloat(27, 29), -27, 0);
+          tree.rotation.y = Math.random() * 2 * Math.PI;
+          group.add(tree);
+        }
+        break;
     }
 
-    return treeGroup;
+    group.tick = () => {
+      group.children.forEach(tree => {
+        if (tree.material.opacity < .8) {
+          tree.material.opacity += 0.001;
+        }
+      })
+    };
+    return group;
   }
 
-  createNewBranch(_tree) {
-
-    console.warn(_tree.children[0])
-  }
 
   /**
    * Create tree from JSON data
@@ -362,6 +555,10 @@ function normalizeAttribute (attribute) {
     attribute.setXYZ(i, v.x, v.y, v.z);
   }
   return attribute;
+}
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
 }
 
 export { ProceduralTree }
