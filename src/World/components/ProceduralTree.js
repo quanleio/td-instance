@@ -15,8 +15,11 @@ import {
   Matrix4,
   Color,
   Vector3,
+  Euler,
+  Quaternion,
   CatmullRomCurve3,
-  MathUtils
+  MathUtils,
+  DynamicDrawUsage
 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 import { Tree } from '../../../vendor2/proctree.js'
 
@@ -80,10 +83,7 @@ class ProceduralTree {
    */
   createTree (_randomConfig, colorHex) {
 
-    // this.config.levels = level;
-    // this.config.clumpMax = clumMax;
     const tree = new Tree(_randomConfig);
-
     const treeGeometry = new BufferGeometry();
     treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
     treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
@@ -106,22 +106,18 @@ class ProceduralTree {
       opacity: 0
     });
 
-    // const twigGeometry = new BufferGeometry();
-    // twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
-    // twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
-    // twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
-    // twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
-
     // const treeGroup = new Group();
-    const trunk = new Mesh(treeGeometry, treeMaterial);
+    let trunk = new InstancedMesh( treeGeometry, treeMaterial, 4 );
+    trunk.type = "InstancedMesh";
     trunk.name = 'TRUNK';
-    trunk.layers.enable(1);
-    trunk.scale.setScalar(2.7);
 
-    // const twig = new Mesh(twigGeometry, this.twigMaterial);
-    // twig.name = 'TWIG';
-    // twig.layers.enable(1);
-    // treeGroup.add(trunk, twig);
+    console.error(_randomConfig);
+    const matrix = new Matrix4();
+    for ( let i = 0; i < trunk.count; i ++ ) {
+      randomizeMatrix(matrix, _randomConfig.type);
+      trunk.setMatrixAt( i, matrix );
+      trunk.layers.enable(1);
+    }
 
     // trunk.tick = () => {
     //   // trunk.material.opacity = 1 + Math.sin(new Date().getTime() * .0025);
@@ -157,163 +153,158 @@ class ProceduralTree {
     // one group has 10 trees
     let group = new Group();
     group.name = _groupName;
-    const seed = 10;
 
     switch (_groupName) {
       case 'groupTree1':
-        for(let i = 1; i<=seed; i++) {
-          const RANDOM_CONFIG = {
-            // tree
-            seed:                 1,
-            segments:             16,
-            levels:               level,
-            vMultiplier:          2.36,
-            twigScale:            0.39,
+        let RANDOM_CONFIG_1 = {
+          // custom
+          type:                 _groupName,
 
-            // branch
-            initalBranchLength:   1,
-            lengthFalloffFactor:  1,
-            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
-            clumpMax:             MathUtils.randFloat(0, 1),
-            clumpMin:             MathUtils.randFloat(0, 0.9),
-            branchFactor:         MathUtils.randFloat(2, 4),
-            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
-            growAmount:           0.235,
-            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+          // tree
+          seed:                 1,
+          segments:             6,
+          levels:               level,
+          vMultiplier:          2.36,
+          twigScale:            0.39,
 
-            // trunk
-            maxRadius:            0.1/3,
-            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
-            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
-            treeSteps:            20,
-            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
-            radiusFalloffRate:    0.8,
-            twistRate:            MathUtils.randFloat(0, 10), //3.02,
-            trunkLength:          8
-          }
-          const tree = this.createTree(RANDOM_CONFIG, '0xFEFEB1');
-          tree.position.set(MathUtils.randFloat(-30, -28), -27, 0);
-          tree.rotation.y = Math.random() * 2 * Math.PI;
-          group.add(tree);
+          // branch
+          initalBranchLength:   1,
+          lengthFalloffFactor:  1,
+          lengthFalloffPower:   0.2063940596015426, //  MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.16209421383523392, // MathUtils.randFloat(0, 1),
+          clumpMin:             0.6810886025671663, //  MathUtils.randFloat(0, 0.9),
+          branchFactor:         2.2907564173935904, //  MathUtils.randFloat(2, 4),
+          dropAmount:           MathUtils.randFloat(-0.2, 0), //-0.2, // ,
+          growAmount:           0.235,
+          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.36071267851238353
+
+          // trunk
+          maxRadius:            0.1/3,
+          climbRate:            0.5282817026061652, //  MathUtils.randFloat(0.05, 0.53),
+          trunkKink:            0.20795269167420438, // MathUtils.randFloat(0, 0.8),
+          treeSteps:            20,
+          taperRate:            0.7556732381848323, //  MathUtils.randFloat(.7, 1),// 0.947,
+          radiusFalloffRate:    0.5,
+          twistRate:            7.820294672753711, //   MathUtils.randFloat(0, 10), //3.02,
+          trunkLength:          4
         }
+        let tree1 = this.createTree(RANDOM_CONFIG_1, '0xFEFEB1');
+        group.add(tree1);
         break;
       case 'groupTree2':
-        for(let i = 1; i<=seed; i++) {
-          const RANDOM_CONFIG = {
-            // proctree
-            seed:                 1,
-            segments:             16,
-            levels:               level,
-            vMultiplier:          2.36,
-            twigScale:            0.39,
+        let RANDOM_CONFIG_2 = {
+          // custom
+          type:                 _groupName,
 
-            // branch
-            initalBranchLength:   1,
-            lengthFalloffFactor:  1,
-            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
-            clumpMax:             MathUtils.randFloat(0, 1),
-            clumpMin:             MathUtils.randFloat(0, 0.9),
-            branchFactor:         MathUtils.randFloat(2, 4),
-            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
-            growAmount:           0.235,
-            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+          // proctree
+          seed:                 1,
+          segments:             6,
+          levels:               level,
+          vMultiplier:          2.36,
+          twigScale:            0.39,
 
-            // trunk
-            maxRadius:            0.1/3,
-            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
-            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
-            treeSteps:            20,
-            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
-            radiusFalloffRate:    0.8,
-            twistRate:            MathUtils.randFloat(0, 10), //3.02,
-            trunkLength:          8
-          }
-          const tree = this.createTree(RANDOM_CONFIG, '0xfc4c4e');
-          tree.position.set(MathUtils.randFloat(-10, -8), -27, -10);
-          tree.rotation.y = Math.random() * 2 * Math.PI;
-          group.add(tree);
+          // branch
+          initalBranchLength:   1,
+          lengthFalloffFactor:  1,
+          lengthFalloffPower:   0.19215669933977964, //MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.33941567348001445, //MathUtils.randFloat(0, 1),
+          clumpMin:             0.36128456637215095, //MathUtils.randFloat(0, 0.9),
+          branchFactor:         2.440008648155277, // MathUtils.randFloat(2, 4),
+          dropAmount:           0.06366507251179093, //MathUtils.randFloat(-0.2, 0.07),
+          growAmount:           0.235,
+          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.3108406901825827
+
+          // trunk
+          maxRadius:            0.1/3,
+          climbRate:            0.47836896861960176, //MathUtils.randFloat(0.05, 0.53),
+          trunkKink:            0.09493557972033351, //MathUtils.randFloat(0, 0.8),
+          treeSteps:            20,
+          taperRate:            0.8145902136162617, //MathUtils.randFloat(.7, 1),
+          radiusFalloffRate:    0.5,
+          twistRate:            0.6836371783348683, //MathUtils.randFloat(0, 10),
+          trunkLength:          4
         }
+        let tree2 = this.createTree(RANDOM_CONFIG_2, '0xfc4c4e');
+        group.add(tree2);
         break;
       case 'groupTree3':
-        for(let i = 1; i<=seed; i++) {
-          const RANDOM_CONFIG = {
-            // proctree
-            seed:                 1,
-            segments:             16,
-            levels:               level,
-            vMultiplier:          2.36,
-            twigScale:            0.39,
+        let RANDOM_CONFIG_3 = {
+          // custom
+          type:                 _groupName,
 
-            // branch
-            initalBranchLength:   1,
-            lengthFalloffFactor:  1,
-            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
-            clumpMax:             MathUtils.randFloat(0, 1),
-            clumpMin:             MathUtils.randFloat(0, 0.9),
-            branchFactor:         MathUtils.randFloat(2, 4),
-            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
-            growAmount:           0.235,
-            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+          // proctree
+          seed:                 1,
+          segments:             6,
+          levels:               level,
+          vMultiplier:          2.36,
+          twigScale:            0.39,
 
-            // trunk
-            maxRadius:            0.1/3,
-            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
-            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
-            treeSteps:            20,
-            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
-            radiusFalloffRate:    0.8,
-            twistRate:            MathUtils.randFloat(0, 10), //3.02,
-            trunkLength:          8
-          }
-          const tree = this.createTree(RANDOM_CONFIG, '0x40DFA0');
-          tree.position.set(MathUtils.randFloat(10, 12), -27, -10);
-          tree.rotation.y = Math.random() * 2 * Math.PI;
-          group.add(tree);
+          // branch
+          initalBranchLength:   1,
+          lengthFalloffFactor:  1,
+          lengthFalloffPower:   0.357604487749664, //MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.9790741245992556, //MathUtils.randFloat(0, 1),
+          clumpMin:             0.012107264630375791, //MathUtils.randFloat(0, 0.9),
+          branchFactor:         2.802448182730217, // MathUtils.randFloat(2, 4),
+          dropAmount:           0.01961555265689796, //MathUtils.randFloat(-0.2, 0.07),
+          growAmount:           0.235,
+          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.3337564497547323,
+
+          // trunk
+          maxRadius:            0.1/3,
+          climbRate:            0.4973469993950035, //MathUtils.randFloat(0.05, 0.53),
+          trunkKink:            0.09944751108776213, //MathUtils.randFloat(0, 0.8),
+          treeSteps:            20,
+          taperRate:            0.8478970608839123, //MathUtils.randFloat(.7, 1),
+          radiusFalloffRate:    0.5,
+          twistRate:            0.8955388844167378, //MathUtils.randFloat(0, 10),
+          trunkLength:          4
         }
+        let tree3 = this.createTree(RANDOM_CONFIG_3, '0x40DFA0');
+        group.add(tree3);
         break;
       case 'groupTree4':
-        for(let i = 1; i<=seed; i++) {
-          const RANDOM_CONFIG = {
-            // proctree
-            seed:                 1,
-            segments:             16,
-            levels:               level,
-            vMultiplier:          2.36,
-            twigScale:            0.39,
+        let RANDOM_CONFIG_4 = {
+          // custom
+          type:                 _groupName,
 
-            // branch
-            initalBranchLength:   1,
-            lengthFalloffFactor:  1,
-            lengthFalloffPower:   MathUtils.randFloat(0.1, 2.5),
-            clumpMax:             MathUtils.randFloat(0, 1),
-            clumpMin:             MathUtils.randFloat(0, 0.9),
-            branchFactor:         MathUtils.randFloat(2, 4),
-            dropAmount:           MathUtils.randFloat(-0.2, 0.07), //-0.2,
-            growAmount:           0.235,
-            sweepAmount:          MathUtils.randFloat(-.8, .8), //0.01,
+          // proctree
+          seed:                 1,
+          segments:             6,
+          levels:               level,
+          vMultiplier:          2.36,
+          twigScale:            0.39,
 
-            // trunk
-            maxRadius:            0.1/3,
-            climbRate:            MathUtils.randFloat(0.05, 0.53), //0.371,
-            trunkKink:            MathUtils.randFloat(0, 0.8), //0.093,
-            treeSteps:            20,
-            taperRate:            MathUtils.randFloat(.7, 1),// 0.947,
-            radiusFalloffRate:    0.8,
-            twistRate:            MathUtils.randFloat(0, 10), //3.02,
-            trunkLength:          8
-          }
-          const tree = this.createTree(RANDOM_CONFIG, '0xFF7AE9');
-          tree.position.set(MathUtils.randFloat(27, 29), -27, 0);
-          tree.rotation.y = Math.random() * 2 * Math.PI;
-          group.add(tree);
+          // branch
+          initalBranchLength:   1,
+          lengthFalloffFactor:  1,
+          lengthFalloffPower:   0.8013271560162166, //MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.8493598951700212, //MathUtils.randFloat(0, 1),
+          clumpMin:             0.06630050601993505, //MathUtils.randFloat(0, 0.9),
+          branchFactor:         3.6234691184720123, // MathUtils.randFloat(2, 4),
+          dropAmount:           -0.14905403848433774, //MathUtils.randFloat(-0.2, 0.07), //-0.2,
+          growAmount:           0.235,
+          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.5293518388238034,
+
+          // trunk
+          maxRadius:            0.1/3,
+          climbRate:            0.4251183790857488, // MathUtils.randFloat(0.05, 0.53), //0.371,
+          trunkKink:            0.14079340037449148, //MathUtils.randFloat(0, 0.8), //0.093,
+          treeSteps:            20,
+          taperRate:            0.9369354433191494, //MathUtils.randFloat(.7, 1),// 0.947,
+          radiusFalloffRate:    0.5,
+          twistRate:            8.83780839441161, //MathUtils.randFloat(0, 10), //3.02,
+          trunkLength:          4
         }
-        break;
+        let tree4 = this.createTree(RANDOM_CONFIG_4, '0xFF7AE9');
+        group.add(tree4);
+      break;
     }
 
     group.tick = () => {
       group.children.forEach(tree => {
-        if (tree.material.opacity < .8) {
-          tree.material.opacity += 0.001;
+        if (tree.material.opacity < .6) {
+          tree.material.opacity += 0.005;
         }
       })
     };
@@ -536,6 +527,52 @@ class ProceduralTree {
   }
 
 }
+
+/**
+ * Random position for each object
+ * @type {(function(*): void)|*}
+ */
+const randomizeMatrix = function() {
+  const position = new Vector3();
+  const rotation = new Euler();
+  const quaternion = new Quaternion();
+  const scale = new Vector3();
+
+  return function(matrix, type) {
+
+    switch (type) {
+      case 'groupTree1':
+        position.x = ( Math.random() * 1 - 40 );
+        position.y = -40;
+        position.z = ( Math.random() * 1 - 3 );
+        break;
+      case 'groupTree2':
+        position.x = ( Math.random() * 1 - 10 );
+        position.y = -40;
+        position.z = ( Math.random() * 1 - 3 );
+        break;
+      case 'groupTree3':
+        position.x = ( Math.random() * 1 + 10 );
+        position.y = -40;
+        position.z = ( Math.random() * 1 - 3 );
+        break;
+      case 'groupTree4':
+        position.x = ( Math.random() * 1 + 40 );
+        position.y = -40;
+        position.z = ( Math.random() * 1 - 3 );
+        break;
+    }
+
+    rotation.x = 0;
+    rotation.y = Math.random() * 2 * Math.PI;
+    rotation.z = 0;
+    quaternion.setFromEuler(rotation);
+
+    scale.x = scale.y = scale.z = 8;
+
+    matrix.compose(position, quaternion, scale);
+  };
+}();
 
 function createFloatAttribute (array, itemSize) {
   const typedArray = new Float32Array(Tree.flattenArray(array));
