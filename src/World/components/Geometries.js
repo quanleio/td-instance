@@ -41,8 +41,8 @@ class Geometries {
    * @returns {*}
    */
   createParticles() {
-    const particleCount = 1000;
-    const radius = 10;
+    const particleCount = 1200;// 1000;
+    const radius = 20; //10;
     const positions = [];
     const colors = [];
     const sizes = [];
@@ -137,9 +137,12 @@ class Geometries {
         mesh.setColorAt( i, color.setHex( 0xffffff * Math.random() ) );
 
         // position
-        const randomX = ( Math.random() * 5 - 5/2 ) * 10;
-        const randomY = ( Math.random() * 2 - 1 ) * 20;
-        const randomZ = ( Math.random() * 4 - 2 ) * 10;
+        /*const randomX = ( Math.random() * 5 - 5/2 ) * 10;
+        const randomY = ( Math.random() * 2 - 1 )   * 20;
+        const randomZ = ( Math.random() * 4 - 2 )   * 10;*/
+        const randomX = ( Math.random() * 5 - 5/2 ) * 40;
+        const randomY = ( Math.random() * 2 - 1 )   * 40;
+        const randomZ = ( Math.random() * 4 - 2 )   * 20;
         matrix.setPosition( randomX, randomY , randomZ );
         mesh.setMatrixAt( i, matrix );
 
@@ -157,9 +160,9 @@ class Geometries {
         mesh.layers.enable(1);
       }
 
-      // let line = this.addLine(points);
-      // mesh.add(line);
-      // line.matrixAutoUpdate = false;
+      /*let line = this.addLine(points);
+      mesh.add(line);
+      line.matrixAutoUpdate = false;*/
 
       mesh.tick = (delta) => {
 
@@ -234,8 +237,8 @@ class Geometries {
   createMesh() {
     let instanedMeshs = [];
     const material = new MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
-    const count = 20;
-    const size = 0.6;
+    const count = 30;
+    const size = 0.8;
 
     // tetrahedron
     const tetraGeo = new TetrahedronBufferGeometry(size, 0);
@@ -490,7 +493,7 @@ class Geometries {
    * Make line between points
    * @returns {*}
    */
-  /*makeLineBetweenPoints() {
+  makeLineBetweenPoints() {
     const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
     const lineGeo = new BufferGeometry().setFromPoints( points );
     const line = new Line( lineGeo, material );
@@ -500,7 +503,7 @@ class Geometries {
       line.geometry.attributes.position.needsUpdate = true;
     }
     return line;
-  }*/
+  }
 }
 
 /**

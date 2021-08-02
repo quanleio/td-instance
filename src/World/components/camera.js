@@ -9,7 +9,7 @@ function createCamera() {
   // camera.position.z = 5;
 
   const camera = new PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
-  camera.position.set( - 1, 0, 90 );
+  camera.position.set( - 1, 0, 120 );
 
   const helper = new CameraHelper( camera );
   camera.add(helper)
