@@ -1,6 +1,6 @@
-import { Clock } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+// import { Clock } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
 
-const clock = new Clock();
+const clock = new THREE.Clock();
 
 class Loop {
   constructor(camera, scene, renderer, sceneComposer) {

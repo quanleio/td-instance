@@ -4,58 +4,78 @@
   <meta charset="UTF-8">
   <title>Instanced</title>
   
+  <!-- Three.js -->
+  <script src="https://unpkg.com/three@0.131.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.131.0/examples/js/loaders/RGBELoader.js"></script>
+  <script src="https://unpkg.com/three@0.131.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- Three.js PostProcessing -->
+  <script src="vendor/three/postprocessing/Pass.js"></script>
+  <script src="vendor/three/postprocessing/RenderPass.js"></script>
+  <script src="vendor/three/postprocessing/LuminosityHighPassShader.js"></script>
+  <script src="vendor/three/postprocessing/CopyShader.js"></script>
+  <script src="vendor/three/postprocessing/UnrealBloomPass.js"></script>
+  <script src="vendor/three/postprocessing/EffectComposer.js"></script>
+  <script src="vendor/three/postprocessing/ShaderPass.js"></script>
+  
+  <script type="module" src="./src/main.js"></script>
+  
+</head>
+<body>
+  <div id="container"></div>
+
   <!--<script id="vertexShader" type="x-shader/x-vertex">
-		precision highp float;
-
-		uniform float sineTime;
-
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
-
-		attribute vec3 position;
-		attribute vec3 offset;
-		attribute vec4 color;
-		attribute vec4 orientationStart;
-		attribute vec4 orientationEnd;
-
-		varying vec3 vPosition;
-		varying vec4 vColor;
-
-		void main(){
-
-			vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
-			vec4 orientation = normalize( mix( orientationStart, orientationEnd, sineTime ) );
-			vec3 vcV = cross( orientation.xyz, vPosition );
-			vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
-
-			vColor = color;
-
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
-
-		}
-
-	</script>
+      precision highp float;
   
-  <script id="fragmentShader" type="x-shader/x-fragment">
-
-		precision highp float;
-
-		uniform float time;
-
-		varying vec3 vPosition;
-		varying vec4 vColor;
-
-		void main() {
-
-			vec4 color = vec4( vColor );
-			color.r += sin( vPosition.x * 10.0 + time ) * 0.5;
-
-			gl_FragColor = color;
-
-		}
-
-	</script>-->
+      uniform float sineTime;
   
+      uniform mat4 modelViewMatrix;
+      uniform mat4 projectionMatrix;
+  
+      attribute vec3 position;
+      attribute vec3 offset;
+      attribute vec4 color;
+      attribute vec4 orientationStart;
+      attribute vec4 orientationEnd;
+  
+      varying vec3 vPosition;
+      varying vec4 vColor;
+  
+      void main(){
+  
+        vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
+        vec4 orientation = normalize( mix( orientationStart, orientationEnd, sineTime ) );
+        vec3 vcV = cross( orientation.xyz, vPosition );
+        vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
+  
+        vColor = color;
+  
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+  
+      }
+  
+    </script>
+    
+    <script id="fragmentShader" type="x-shader/x-fragment">
+  
+      precision highp float;
+  
+      uniform float time;
+  
+      varying vec3 vPosition;
+      varying vec4 vColor;
+  
+      void main() {
+  
+        vec4 color = vec4( vColor );
+        color.r += sin( vPosition.x * 10.0 + time ) * 0.5;
+  
+        gl_FragColor = color;
+  
+      }
+  
+    </script>-->
+
   <!-- For partical system -->
   <script type="x-shader/x-vertex" id="vertexshader">
 
@@ -76,7 +96,7 @@
 			}
 
 		</script>
-  
+
   <script type="x-shader/x-fragment" id="fragmentshader">
 
 			uniform sampler2D pointTexture;
@@ -92,7 +112,7 @@
 			}
 
 		</script>
-  
+
   <!-- For blooming -->
   <script type="x-shader/x-vertex" id="vertexshader-bloom">
 
@@ -107,7 +127,7 @@
 			}
 
 		</script>
-  
+
   <script type="x-shader/x-fragment" id="fragmentshader-bloom">
 
 			uniform sampler2D baseTexture;
@@ -122,11 +142,5 @@
 			}
 
 		</script>
-  
-  <script type="module" src="./src/main.js"></script>
-  
-</head>
-<body>
-  <div id="container"></div>
 </body>
 </html>

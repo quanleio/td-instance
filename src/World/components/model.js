@@ -1,17 +1,17 @@
-import {
-  BufferGeometryLoader,
-  TextureLoader,
-  MeshPhongMaterial,
-  MeshBasicMaterial,
-  InstancedMesh,
-  Object3D,
-  Color,
-  Vector3,
-  Matrix4,
-  MathUtils,
-  Euler,
-  Quaternion
-} from "https://unpkg.com/three@0.130.0/build/three.module.js";
+// import {
+//   BufferGeometryLoader,
+//   TextureLoader,
+//   MeshPhongMaterial,
+//   MeshBasicMaterial,
+//   InstancedMesh,
+//   Object3D,
+//   Color,
+//   Vector3,
+//   Matrix4,
+//   MathUtils,
+//   Euler,
+//   Quaternion
+// } from "https://unpkg.com/three@0.130.0/build/three.module.js";
 
 /**
  * Load BufferGeometry to make mesh.
@@ -19,14 +19,14 @@ import {
  */
 function loadSuzanne() {
   return new Promise((resolve, reject) => {
-    new BufferGeometryLoader().load(
+    new THREE.BufferGeometryLoader().load(
       'assets/suzanne_buffergeometry.json',
       (buffGeo) => {
         buffGeo.computeVertexNormals();
 
         makeInstance(buffGeo).then(_instancedMesh => {
 
-          const radiansPerSecond = MathUtils.degToRad(30);
+          const radiansPerSecond = THREE.MathUtils.degToRad(30);
 
           // this method will be called once per frame
           _instancedMesh.tick = ( delta ) => {
@@ -48,7 +48,7 @@ function loadSuzanne() {
  */
 function loadSakura() {
   return new Promise((resolve, reject) => {
-    new BufferGeometryLoader().load(
+    new THREE.BufferGeometryLoader().load(
         "assets/sakura.json",
         (buffGeo) => {
           buffGeo.computeVertexNormals();
@@ -68,7 +68,7 @@ function loadSakura() {
  */
 function makeInstance(_buffGeo) {
   return new Promise((resolve, reject) => {
-    const matrix = new Matrix4();
+    const matrix = new THREE.Matrix4();
 
     fetch("assets/instances.json")
       .then((r) => r.json())
@@ -76,15 +76,15 @@ function makeInstance(_buffGeo) {
         let instancedCount = instanceData.length;
         // console.error("instancedCount: ", instancedCount);
 
-        const material = new MeshPhongMaterial();
-        const color = new Color();
+        const material = new THREE.MeshPhongMaterial();
+        const color = new THREE.Color();
 
-        let instancedMesh = new InstancedMesh(_buffGeo, material, instancedCount);
+        let instancedMesh = new THREE.InstancedMesh(_buffGeo, material, instancedCount);
         instancedMesh.type = "InstancedMesh";
 
         for (let i = 0; i < instanceData.length; i++) {
           let inst = instanceData[i];
-          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedMesh.setMatrixAt(i, matrix);
           instancedMesh.setColorAt(i, color);
@@ -106,18 +106,18 @@ function makeInstance(_buffGeo) {
  */
 function makeInstanceWithRandomPos(_buffGeo) {
   return new Promise((resolve, reject) => {
-    const matrix = new Matrix4();
-    const color = new Color();
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
     const count = 1000;
-    const dummy = new Object3D();
+    const dummy = new THREE.Object3D();
     let points = [];
 
-    let textureLeaf = new TextureLoader().load("assets/branch.002_baseColor.png");
-    let material = new MeshBasicMaterial( {
+    let textureLeaf = new THREE.TextureLoader().load("assets/branch.002_baseColor.png");
+    let material = new THREE.MeshBasicMaterial( {
       map: textureLeaf
     } );
 
-    let instancedMesh = new InstancedMesh(_buffGeo, material, count);
+    let instancedMesh = new THREE.InstancedMesh(_buffGeo, material, count);
     instancedMesh.type = "InstancedMesh";
 
     for (let i = 0; i < count; i++) {
@@ -145,10 +145,10 @@ function makeInstanceWithRandomPos(_buffGeo) {
  */
 const randomizeMatrix = function() {
 
-  const position = new Vector3();
-  const rotation = new Euler();
-  const quaternion = new Quaternion();
-  const scale = new Vector3();
+  const position = new THREE.Vector3();
+  const rotation = new THREE.Euler();
+  const quaternion = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
 
   return function(matrix) {
 

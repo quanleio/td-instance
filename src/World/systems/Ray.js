@@ -1,15 +1,15 @@
-import {
-  Raycaster,
-  Vector2,
-  Color,
-} from "https://unpkg.com/three@0.130.0/build/three.module.js";
+// import {
+//   Raycaster,
+//   Vector2,
+//   Color,
+// } from "https://unpkg.com/three@0.130.0/build/three.module.js";
 
 class Ray {
   constructor(scene, camera) {
     this.camera = camera;
     this.scene = scene;
-    this.raycaster = new Raycaster();
-    this.mouse = new Vector2();
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
 
     window.addEventListener("click", (ev) => {
       this.mouse.x = (ev.clientX / window.innerWidth) * 2 - 1;
@@ -31,7 +31,7 @@ class Ray {
   }
 
   setColor(intersects) {
-    const color = new Color();
+    const color = new THREE.Color();
     if (intersects.length > 0) {
       const INTERSECTED = intersects[0].object;
 

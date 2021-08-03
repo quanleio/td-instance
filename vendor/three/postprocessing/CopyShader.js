@@ -1,17 +1,20 @@
-/**
+( function () {
+
+	/**
  * Full-screen textured quad shader
  */
-
-var CopyShader = {
-
-	uniforms: {
-
-		'tDiffuse': { value: null },
-		'opacity': { value: 1.0 }
-
-	},
-
-	vertexShader: /* glsl */`
+	var CopyShader = {
+		uniforms: {
+			'tDiffuse': {
+				value: null
+			},
+			'opacity': {
+				value: 1.0
+			}
+		},
+		vertexShader:
+  /* glsl */
+  `
 
 		varying vec2 vUv;
 
@@ -21,8 +24,9 @@ var CopyShader = {
 			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 
 		}`,
-
-	fragmentShader: /* glsl */`
+		fragmentShader:
+  /* glsl */
+  `
 
 		uniform float opacity;
 
@@ -36,7 +40,8 @@ var CopyShader = {
 			gl_FragColor = opacity * texel;
 
 		}`
+	};
 
-};
+	THREE.CopyShader = CopyShader;
 
-export { CopyShader };
+} )();

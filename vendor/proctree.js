@@ -44,7 +44,7 @@ var Tree = function (data) {
   this.uvsTwig = [];
   this.root.split(null, null, this.properties);
   this.createForks();
-  this.createTwigs();
+  // this.createTwigs();
   this.doFaces();
   this.calcNormals();
 };

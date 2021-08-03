@@ -1,30 +1,4 @@
-import {
-  SphereBufferGeometry,
-  BoxBufferGeometry,
-  CylinderBufferGeometry,
-  TubeBufferGeometry,
-  BufferAttribute,
-  BufferGeometry,
-  MeshStandardMaterial,
-  MeshLambertMaterial,
-  PointsMaterial,
-  MeshBasicMaterial,
-  TextureLoader,
-  InstancedMesh,
-  Mesh,
-  Points,
-  Group,
-  Matrix4,
-  Color,
-  Vector3,
-  Euler,
-  Quaternion,
-  CatmullRomCurve3,
-  MathUtils,
-  DynamicDrawUsage,
-  Clock
-} from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-import { Tree } from '../../../vendor2/proctree.js'
+import { Tree } from '../../../vendor/proctree.js';
 
 const DEFAULT_CONFIG = {
   // proctree
@@ -59,7 +33,7 @@ const DEFAULT_CONFIG = {
   // treeColor:            0x9d7362,         // brown
   // twigColor:            0x68AA55
 }
-const clock = new Clock();
+const clock = new THREE.Clock();
 let nEnd = 0;
 let nMax, nStep = 90;
 
@@ -68,13 +42,13 @@ class ProceduralTree {
   constructor() {
 
     this.config = DEFAULT_CONFIG;
-    this.textureLoader = new TextureLoader();
-    // this.treeMaterial = new MeshStandardMaterial({
+    this.textureLoader = new THREE.TextureLoader();
+    // this.treeMaterial = new THREE.MeshStandardMaterial({
     //   color: this.config.treeColor,
     //   roughness: 1.0,
     //   metalness: 0.1,
     // });
-    // this.twigMaterial = new MeshStandardMaterial({
+    // this.twigMaterial = new THREE.MeshStandardMaterial({
     //   color: this.config.twigColor,
     //   roughness: 1.0,
     //   metalness: 0.0,
@@ -91,7 +65,7 @@ class ProceduralTree {
     const tree = new Tree(_randomConfig);
     console.error(tree)
 
-    const treeGeometry = new BufferGeometry();
+    const treeGeometry = new THREE.BufferGeometry();
     treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
     treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
     treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
@@ -101,13 +75,13 @@ class ProceduralTree {
 
     // fixed color
     let colorValue = parseInt ( colorHex.replace("#","0x"), 16 );
-    let colored = new Color( colorValue );
+    let colored = new THREE.Color( colorValue );
 
     // Random Color
     // let randomColor = new Color( 0xffffff );
     // randomColor.setHex( Math.random() * 0xffffff );
     // colored.setHex( Math.random() * 0xffffff );
-    const treeMaterial = new MeshStandardMaterial({
+    const treeMaterial = new THREE.MeshStandardMaterial({
       color: colored,
       roughness: 1.0,
       metalness: 0.1,
@@ -115,13 +89,13 @@ class ProceduralTree {
       opacity: 0
     });
 
-    // const treeGroup = new Group();
-    let trunk = new InstancedMesh( treeGeometry, treeMaterial, 4 );
+    // const treeGroup = new THREE.Group();
+    let trunk = new THREE.InstancedMesh( treeGeometry, treeMaterial, 4 );
     trunk.type = "InstancedMesh";
     trunk.name = 'TRUNK';
 
     // console.error(_randomConfig);
-    const matrix = new Matrix4();
+    const matrix = new THREE.Matrix4();
     for ( let i = 0; i < trunk.count; i ++ ) {
       randomizeMatrix(matrix, _randomConfig.type);
       trunk.setMatrixAt( i, matrix );
@@ -141,9 +115,15 @@ class ProceduralTree {
     return trunk;
   }
 
+  /**
+   * Create group of tree. Each group has 4 trees.
+   * @param _groupName
+   * @param level
+   * @returns {*}
+   */
   createTreeGroup(_groupName, level) {
 
-    let group = new Group();
+    let group = new THREE.Group();
     group.name = _groupName;
 
     const defaultConfig = {
@@ -162,7 +142,7 @@ class ProceduralTree {
       branchFactor: 2.45,
       dropAmount: -0.15,
       growAmount: 0.235,
-      sweepAmount: MathUtils.randFloat(-0.4, 0.4),
+      sweepAmount: THREE.MathUtils.randFloat(-0.4, 0.4),
       maxRadius: 0.1/2,
       climbRate: 0.371,
       trunkKink: 0.093,
@@ -189,22 +169,22 @@ class ProceduralTree {
           // branch
           initalBranchLength:   1,
           lengthFalloffFactor:  1,
-          lengthFalloffPower:   0.2063940596015426, //  MathUtils.randFloat(0.1, 2.5),
-          clumpMax:             0.16209421383523392, // MathUtils.randFloat(0, 1),
-          clumpMin:             0.6810886025671663, //  MathUtils.randFloat(0, 0.9),
-          branchFactor:         2.2907564173935904, //  MathUtils.randFloat(2, 4),
-          dropAmount:           MathUtils.randFloat(-0.2, 0), //-0.2, // ,
+          lengthFalloffPower:   0.2063940596015426, //  THREE.MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.16209421383523392, // THREE.MathUtils.randFloat(0, 1),
+          clumpMin:             0.6810886025671663, //  THREE.MathUtils.randFloat(0, 0.9),
+          branchFactor:         2.2907564173935904, //  THREE.MathUtils.randFloat(2, 4),
+          dropAmount:           THREE.MathUtils.randFloat(-0.2, 0), //-0.2, // ,
           growAmount:           0.235,
-          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.36071267851238353
+          sweepAmount:          THREE.MathUtils.randFloat(-.8, .8), //-0.36071267851238353
 
           // trunk
           maxRadius:            0.1/3,
-          climbRate:            0.5282817026061652, //  MathUtils.randFloat(0.05, 0.53),
-          trunkKink:            0.20795269167420438, // MathUtils.randFloat(0, 0.8),
+          climbRate:            0.5282817026061652, //  THREE.MathUtils.randFloat(0.05, 0.53),
+          trunkKink:            0.20795269167420438, // THREE.MathUtils.randFloat(0, 0.8),
           treeSteps:            20,
-          taperRate:            0.7556732381848323, //  MathUtils.randFloat(.7, 1),// 0.947,
+          taperRate:            0.7556732381848323, //  THREE.MathUtils.randFloat(.7, 1),// 0.947,
           radiusFalloffRate:    0.5,
-          twistRate:            7.820294672753711, //   MathUtils.randFloat(0, 10), //3.02,
+          twistRate:            7.820294672753711, //   THREE.MathUtils.randFloat(0, 10), //3.02,
           trunkLength:          4
         }
         let tree1 = this.createTree(defaultConfig, '0xFEFEB1');
@@ -225,22 +205,22 @@ class ProceduralTree {
           // branch
           initalBranchLength:   1,
           lengthFalloffFactor:  1,
-          lengthFalloffPower:   0.19215669933977964, //MathUtils.randFloat(0.1, 2.5),
-          clumpMax:             0.33941567348001445, //MathUtils.randFloat(0, 1),
-          clumpMin:             0.36128456637215095, //MathUtils.randFloat(0, 0.9),
-          branchFactor:         2.440008648155277, // MathUtils.randFloat(2, 4),
-          dropAmount:           0.06366507251179093, //MathUtils.randFloat(-0.2, 0.07),
+          lengthFalloffPower:   0.19215669933977964, //THREE.MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.33941567348001445, //THREE.MathUtils.randFloat(0, 1),
+          clumpMin:             0.36128456637215095, //THREE.MathUtils.randFloat(0, 0.9),
+          branchFactor:         2.440008648155277, // THREE.MathUtils.randFloat(2, 4),
+          dropAmount:           0.06366507251179093, //THREE.MathUtils.randFloat(-0.2, 0.07),
           growAmount:           0.235,
-          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.3108406901825827
+          sweepAmount:          THREE.MathUtils.randFloat(-.8, .8), //-0.3108406901825827
 
           // trunk
           maxRadius:            0.1/3,
-          climbRate:            0.47836896861960176, //MathUtils.randFloat(0.05, 0.53),
-          trunkKink:            0.09493557972033351, //MathUtils.randFloat(0, 0.8),
+          climbRate:            0.47836896861960176, //THREE.MathUtils.randFloat(0.05, 0.53),
+          trunkKink:            0.09493557972033351, //THREE.MathUtils.randFloat(0, 0.8),
           treeSteps:            20,
-          taperRate:            0.8145902136162617, //MathUtils.randFloat(.7, 1),
+          taperRate:            0.8145902136162617, //THREE.MathUtils.randFloat(.7, 1),
           radiusFalloffRate:    0.5,
-          twistRate:            0.6836371783348683, //MathUtils.randFloat(0, 10),
+          twistRate:            0.6836371783348683, //THREE.MathUtils.randFloat(0, 10),
           trunkLength:          4
         }
         let tree2 = this.createTree(defaultConfig, '0xfc4c4e');
@@ -261,22 +241,22 @@ class ProceduralTree {
           // branch
           initalBranchLength:   1,
           lengthFalloffFactor:  1,
-          lengthFalloffPower:   0.357604487749664, //MathUtils.randFloat(0.1, 2.5),
-          clumpMax:             0.9790741245992556, //MathUtils.randFloat(0, 1),
-          clumpMin:             0.012107264630375791, //MathUtils.randFloat(0, 0.9),
-          branchFactor:         2.802448182730217, // MathUtils.randFloat(2, 4),
-          dropAmount:           0.01961555265689796, //MathUtils.randFloat(-0.2, 0.07),
+          lengthFalloffPower:   0.357604487749664, //THREE.MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.9790741245992556, //THREE.MathUtils.randFloat(0, 1),
+          clumpMin:             0.012107264630375791, //THREE.MathUtils.randFloat(0, 0.9),
+          branchFactor:         2.802448182730217, // THREE.MathUtils.randFloat(2, 4),
+          dropAmount:           0.01961555265689796, //THREE.MathUtils.randFloat(-0.2, 0.07),
           growAmount:           0.235,
-          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.3337564497547323,
+          sweepAmount:          THREE.MathUtils.randFloat(-.8, .8), //-0.3337564497547323,
 
           // trunk
           maxRadius:            0.1/3,
-          climbRate:            0.4973469993950035, //MathUtils.randFloat(0.05, 0.53),
-          trunkKink:            0.09944751108776213, //MathUtils.randFloat(0, 0.8),
+          climbRate:            0.4973469993950035, //THREE.MathUtils.randFloat(0.05, 0.53),
+          trunkKink:            0.09944751108776213, //THREE.MathUtils.randFloat(0, 0.8),
           treeSteps:            20,
-          taperRate:            0.8478970608839123, //MathUtils.randFloat(.7, 1),
+          taperRate:            0.8478970608839123, //THREE.MathUtils.randFloat(.7, 1),
           radiusFalloffRate:    0.5,
-          twistRate:            0.8955388844167378, //MathUtils.randFloat(0, 10),
+          twistRate:            0.8955388844167378, //THREE.MathUtils.randFloat(0, 10),
           trunkLength:          4
         }
         let tree3 = this.createTree(defaultConfig, '0x40DFA0');
@@ -297,22 +277,22 @@ class ProceduralTree {
           // branch
           initalBranchLength:   1,
           lengthFalloffFactor:  1,
-          lengthFalloffPower:   0.8013271560162166, //MathUtils.randFloat(0.1, 2.5),
-          clumpMax:             0.8493598951700212, //MathUtils.randFloat(0, 1),
-          clumpMin:             0.06630050601993505, //MathUtils.randFloat(0, 0.9),
-          branchFactor:         3.6234691184720123, // MathUtils.randFloat(2, 4),
-          dropAmount:           -0.14905403848433774, //MathUtils.randFloat(-0.2, 0.07), //-0.2,
+          lengthFalloffPower:   0.8013271560162166, //THREE.MathUtils.randFloat(0.1, 2.5),
+          clumpMax:             0.8493598951700212, //THREE.MathUtils.randFloat(0, 1),
+          clumpMin:             0.06630050601993505, //THREE.MathUtils.randFloat(0, 0.9),
+          branchFactor:         3.6234691184720123, // THREE.MathUtils.randFloat(2, 4),
+          dropAmount:           -0.14905403848433774, //THREE.MathUtils.randFloat(-0.2, 0.07), //-0.2,
           growAmount:           0.235,
-          sweepAmount:          MathUtils.randFloat(-.8, .8), //-0.5293518388238034,
+          sweepAmount:          THREE.MathUtils.randFloat(-.8, .8), //-0.5293518388238034,
 
           // trunk
           maxRadius:            0.1/3,
-          climbRate:            0.4251183790857488, // MathUtils.randFloat(0.05, 0.53), //0.371,
-          trunkKink:            0.14079340037449148, //MathUtils.randFloat(0, 0.8), //0.093,
+          climbRate:            0.4251183790857488, // THREE.MathUtils.randFloat(0.05, 0.53), //0.371,
+          trunkKink:            0.14079340037449148, //THREE.MathUtils.randFloat(0, 0.8), //0.093,
           treeSteps:            20,
-          taperRate:            0.9369354433191494, //MathUtils.randFloat(.7, 1),// 0.947,
+          taperRate:            0.9369354433191494, //THREE.MathUtils.randFloat(.7, 1),// 0.947,
           radiusFalloffRate:    0.5,
-          twistRate:            8.83780839441161, //MathUtils.randFloat(0, 10), //3.02,
+          twistRate:            8.83780839441161, //THREE.MathUtils.randFloat(0, 10), //3.02,
           trunkLength:          4
         }
         let tree4 = this.createTree(defaultConfig, '0xFF7AE9');
@@ -351,21 +331,21 @@ class ProceduralTree {
       }
     });
 
-    return new BufferAttribute(combined, 3);
+    return new THREE.BufferAttribute(combined, 3);
   }
 
   createMesh(tree, scale, x, y, z, color) {
 
     console.error(tree.geometry)
-    // const geometry = new BufferGeometry();
+    // const geometry = new THREE.BufferGeometry();
     // geometry.setAttribute('position', positions.clone());
     // tree.geometry.setAttribute('initialPosition', tree.geometry.attributes.position.clone());
-    // tree.geometry.attributes.position.setUsage( DynamicDrawUsage );
+    // tree.geometry.attributes.position.setUsage( THREE.DynamicDrawUsage );
 
     let mesh;
     let meshes = [];
 
-    // mesh = new Points(geometry, treeMaterial);
+    // mesh = new THREE.Points(geometry, treeMaterial);
 
     meshes.push({
       mesh: tree, verticesDown: 0, verticesUp: 0, direction: 0, speed: 5/2, delay: Math.floor(200 + 200 * Math.random()),
@@ -517,22 +497,22 @@ class ProceduralTree {
    */
   createBranch( branch, data ) {
 
-    const matrix = new Matrix4();
-    const geometry = new SphereBufferGeometry(.2, 32);
+    const matrix = new THREE.Matrix4();
+    const geometry = new THREE.SphereBufferGeometry(.2, 32);
     let instancedDan;
     let tube;
 
     switch (branch) {
       case 'danA':
         let danACount = data.length;
-        const materialDanA = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-        instancedDan = new InstancedMesh(geometry, materialDanA, danACount);
+        const materialDanA = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new THREE.InstancedMesh(geometry, materialDanA, danACount);
         instancedDan.type = "InstancedMesh";
         let pointsA=[];
 
         for (let i = 0; i < danACount; i++) {
           let inst = data[i];
-          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]); // points
+          let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]); // points
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
           pointsA.push(pos);
@@ -549,14 +529,14 @@ class ProceduralTree {
         break;
       case 'danB':
         let danBCount = data.length;
-        const materialDanB = new MeshStandardMaterial({ color: new Color(0xF2C811).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-        instancedDan = new InstancedMesh(geometry, materialDanB, danBCount);
+        const materialDanB = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xF2C811).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new THREE.InstancedMesh(geometry, materialDanB, danBCount);
         instancedDan.type = "InstancedMesh";
         let pointsB =[];
 
         for (let i = 0; i < danBCount; i++) {
           let inst = data[i];
-          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
           pointsB.push(pos);
@@ -571,14 +551,14 @@ class ProceduralTree {
         break;
       case 'danC':
         let danCCount = data.length;
-        const materialDanC = new MeshStandardMaterial({ color: new Color(0x006bff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-        instancedDan = new InstancedMesh(geometry, materialDanC, danCCount);
+        const materialDanC = new THREE.MeshStandardMaterial({ color: new THREE.Color(0x006bff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new THREE.InstancedMesh(geometry, materialDanC, danCCount);
         instancedDan.type = "InstancedMesh";
         let pointsC = [];
 
         for (let i = 0; i < danCCount; i++) {
           let inst = data[i];
-          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
           pointsC.push(pos)
@@ -593,14 +573,14 @@ class ProceduralTree {
         break;
       case 'danD':
         let danDCount = data.length;
-        const materialDanD = new MeshStandardMaterial({ color: new Color(0xffffff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-        instancedDan = new InstancedMesh(geometry, materialDanD, danDCount);
+        const materialDanD = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xffffff).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+        instancedDan = new THREE.InstancedMesh(geometry, materialDanD, danDCount);
         instancedDan.type = "InstancedMesh";
         let pointsD =[];
 
         for (let i = 0; i < danDCount; i++) {
           let inst = data[i];
-          let pos = new Vector3(inst["tx"], inst["ty"], inst["tz"]);
+          let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]);
           matrix.setPosition(pos);
           instancedDan.setMatrixAt(i, matrix);
           pointsD.push(pos)
@@ -636,8 +616,8 @@ class ProceduralTree {
       radiusSegments: 10,
       closed: false,
     };
-    // const tubeGeometry = new TubeBufferGeometry( pipeSpline, params.extrusionSegments, .03, params.radiusSegments, params.closed );
-    // const material = new MeshLambertMaterial( { color: 0x9B2B27 } );
+    // const tubeGeometry = new THREE.TubeBufferGeometry( pipeSpline, params.extrusionSegments, .03, params.radiusSegments, params.closed );
+    // const material = new THREE.MeshLambertMaterial( { color: 0x9B2B27 } );
     // const tube = new Mesh( tubeGeometry, material );
     // tube.scale.setScalar(5);
     // tube.position.y =-10;
@@ -648,14 +628,14 @@ class ProceduralTree {
 
     // Tube path
     var path = new CatmullRomCurve3( _points );
-    var geometry = new TubeBufferGeometry(path, params.extrusionSegments, 0.05, params.radiusSegments, params.closed );
+    var geometry = new THREE.TubeBufferGeometry(path, params.extrusionSegments, 0.05, params.radiusSegments, params.closed );
 
     // line bufferGeo
     nMax = geometry.attributes.position.count;
-    const material = new MeshLambertMaterial( { color: 0x9B2B27 } );
+    const material = new THREE.MeshLambertMaterial( { color: 0x9B2B27 } );
     geometry.dynamic = true;
     geometry.verticesNeedUpdate = true;
-    const tube = new Mesh( geometry, material );
+    const tube = new THREE.Mesh( geometry, material );
     tube.scale.setScalar(3);
     tube.position.y = -20;
 
@@ -675,7 +655,7 @@ class ProceduralTree {
       //Push the vertex coordinates into the array
       let randomX = (Math.sin(i * 0.2) + Math.cos(i * 0.3)) * height + 12;
       let randomY = ( i - count ) + count / 2;
-      points.push(new Vector3(randomX, randomY, 0));
+      points.push(new THREE.Vector3(randomX, randomY, 0));
     }
 
     console.log(points)
@@ -687,12 +667,12 @@ class ProceduralTree {
 
     nMax = latheGeometry.attributes.position.count;
 
-    const material = new MeshLambertMaterial( { color: 0x9B2B27 } );
+    const material = new THREE.MeshLambertMaterial( { color: 0x9B2B27 } );
     // Instantiate the material of a normal vector
     material.side = DoubleSide; //Set both sides to be visible
 
     // Assign both materials to the geometry
-    var lathe = new Mesh(latheGeometry, material);
+    var lathe = new THREE.Mesh(latheGeometry, material);
 
     lathe.tick = () => {
       nEnd = Math.max( nEnd + nStep , nMax);
@@ -710,10 +690,10 @@ class ProceduralTree {
  * @type {(function(*): void)|*}
  */
 const randomizeMatrix = function() {
-  const position = new Vector3();
-  const rotation = new Euler();
-  const quaternion = new Quaternion();
-  const scale = new Vector3();
+  const position = new THREE.Vector3();
+  const rotation = new THREE.Euler();
+  const quaternion = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
 
   return function(matrix, type) {
 
@@ -753,16 +733,16 @@ const randomizeMatrix = function() {
 
 function createFloatAttribute (array, itemSize) {
   const typedArray = new Float32Array(Tree.flattenArray(array));
-  return new BufferAttribute(typedArray, itemSize);
+  return new THREE.BufferAttribute(typedArray, itemSize);
 }
 
 function createIntAttribute (array, itemSize) {
   const typedArray = new Uint16Array(Tree.flattenArray(array));
-  return new BufferAttribute(typedArray, itemSize);
+  return new THREE.BufferAttribute(typedArray, itemSize);
 }
 
 function normalizeAttribute (attribute) {
-  var v = new Vector3();
+  var v = new THREE.Vector3();
   for (var i = 0; i < attribute.count; i++) {
     v.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
     v.normalize();

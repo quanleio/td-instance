@@ -1,5 +1,5 @@
-import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-import { RGBELoader } from '../../vendor2/RGBELoader.js';
+// import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+// import { RGBELoader } from '../../vendor2/RGBELoader.js';
 import {createCamera} from './components/camera.js';
 import {createScene} from './components/scene.js';
 import {loadSakura, loadSuzanne} from './components/model.js';
@@ -120,11 +120,11 @@ class World {
     console.error(scene)
 
     // Set background for scene as image
-    let pmremGenerator = new PMREMGenerator( renderer );
+    let pmremGenerator = new THREE.PMREMGenerator( renderer );
     pmremGenerator.compileEquirectangularShader();
 
-    new RGBELoader()
-    .setDataType( UnsignedByteType )
+    new THREE.RGBELoader()
+    .setDataType( THREE.UnsignedByteType )
     .setPath( './assets/' )
     .load( 'royal_esplanade_1k.hdr', function ( texture ) {
 

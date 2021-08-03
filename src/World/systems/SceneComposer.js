@@ -1,8 +1,8 @@
-import { Vector2, Layers, ShaderMaterial, MeshBasicMaterial,Vector3 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-import { RenderPass } from '../../../vendor2/RenderPass.js';
-import { UnrealBloomPass } from '../../../vendor2/UnrealBloomPass.js';
-import { EffectComposer} from '../../../vendor2/EffectComposer.js';
-import { ShaderPass } from '../../../vendor2/ShaderPass.js';
+// import { Vector2, Layers, ShaderMaterial, MeshBasicMaterial,Vector3 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
+// import { RenderPass } from '../../../vendor2/RenderPass.js';
+// import { UnrealBloomPass } from '../../../vendor2/UnrealBloomPass.js';
+// import { EffectComposer} from '../../../vendor2/EffectComposer.js';
+// import { ShaderPass } from '../../../vendor2/ShaderPass.js';
 
 const params = {
   exposure:       1,
@@ -10,10 +10,10 @@ const params = {
   bloomThreshold: 0,
   bloomRadius:    0,
 };
-const redBloomTintColor = [ new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ) ];
-const darkMaterial = new MeshBasicMaterial({ color: "black" });
+const redBloomTintColor = [ new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 1, 0, 0 ) ];
+const darkMaterial = new THREE.MeshBasicMaterial({ color: "black" });
 const materials = {};
-const bloomLayer = new Layers();
+const bloomLayer = new THREE.Layers();
 bloomLayer.set( 1 );
 let sceneComposer, bloomComposer;
 
@@ -23,8 +23,8 @@ class SceneComposer {
     this.camera   = _camera;
     this.renderer = _renderer;
 
-    const renderScene = new RenderPass(this.scene, this.camera);
-    const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    const renderScene = new THREE.RenderPass(this.scene, this.camera);
+    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
     bloomPass.threshold = params.bloomThreshold;
     bloomPass.strength  = params.bloomStrength;
     bloomPass.radius    = params.bloomRadius;
@@ -32,13 +32,13 @@ class SceneComposer {
     // Change color for blooming to red
     // bloomPass.bloomTintColors = [ new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ), new Vector3( 1, 0, 0 ) ];
 
-    bloomComposer = new EffectComposer(this.renderer);
+    bloomComposer = new THREE.EffectComposer(this.renderer);
     bloomComposer.renderToScreen = false;
     bloomComposer.addPass(renderScene);
     bloomComposer.addPass(bloomPass);
 
-    const finalPass = new ShaderPass(
-        new ShaderMaterial({
+    const finalPass = new THREE.ShaderPass(
+        new THREE.ShaderMaterial({
           uniforms: {
             baseTexture: {value: null},
             bloomTexture: {value: bloomComposer.renderTarget2.texture},
@@ -50,7 +50,7 @@ class SceneComposer {
     );
     finalPass.needsSwap = true;
 
-    sceneComposer = new EffectComposer(this.renderer);
+    sceneComposer = new THREE.EffectComposer(this.renderer);
     sceneComposer.addPass(renderScene);
     sceneComposer.addPass(finalPass);
   }

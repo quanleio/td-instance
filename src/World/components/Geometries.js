@@ -1,36 +1,36 @@
-import {
-  BoxBufferGeometry,
-  TetrahedronBufferGeometry,
-  IcosahedronBufferGeometry,
-  OctahedronBufferGeometry,
-  BufferGeometry,
-  InstancedBufferGeometry,
-  ShaderMaterial,
-  MeshStandardMaterial,
-  LineBasicMaterial,
-  RawShaderMaterial,
-  TextureLoader,
-  Object3D,
-  Group,
-  Line,
-  Mesh,
-  InstancedMesh,
-  Points,
-  InstancedBufferAttribute,
-  Float32BufferAttribute,
-  MathUtils,
-  Color,
-  Vector3,
-  Vector4,
-  Matrix4,
-  Quaternion,
-  DynamicDrawUsage,
-  AdditiveBlending,
-  Euler,
-  DoubleSide,
-} from "https://unpkg.com/three@0.130.0/build/three.module.js";
+// import {
+//   BoxBufferGeometry,
+//   TetrahedronBufferGeometry,
+//   IcosahedronBufferGeometry,
+//   OctahedronBufferGeometry,
+//   BufferGeometry,
+//   InstancedBufferGeometry,
+//   ShaderMaterial,
+//   MeshStandardMaterial,
+//   LineBasicMaterial,
+//   RawShaderMaterial,
+//   TextureLoader,
+//   Object3D,
+//   Group,
+//   Line,
+//   Mesh,
+//   InstancedMesh,
+//   Points,
+//   InstancedBufferAttribute,
+//   Float32BufferAttribute,
+//   MathUtils,
+//   Color,
+//   Vector3,
+//   Vector4,
+//   Matrix4,
+//   Quaternion,
+//   DynamicDrawUsage,
+//   AdditiveBlending,
+//   Euler,
+//   DoubleSide,
+// } from "https://unpkg.com/three@0.130.0/build/three.module.js";
 
-const radiansPerSecond = MathUtils.degToRad(30);
+const radiansPerSecond = THREE.MathUtils.degToRad(30);
 
 class Geometries {
 
@@ -46,24 +46,24 @@ class Geometries {
     const positions = [];
     const colors = [];
     const sizes = [];
-    const color = new Color();
+    const color = new THREE.Color();
     let points = [];
 
     let uniforms = {
-      pointTexture: { value: new TextureLoader().load( "assets/spark1.png" ) }
+      pointTexture: { value: new THREE.TextureLoader().load( "assets/spark1.png" ) }
     };
 
-    const shaderMaterial = new ShaderMaterial( {
+    const shaderMaterial = new THREE.ShaderMaterial( {
       uniforms: uniforms,
       vertexShader: document.getElementById( 'vertexshader' ).textContent,
       fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-      blending: AdditiveBlending,
+      blending: THREE.AdditiveBlending,
       depthTest: false,
       transparent: true,
       vertexColors: true,
     } );
 
-    const geometry = new BufferGeometry();
+    const geometry = new THREE.BufferGeometry();
     for ( let i = 0; i < particleCount; i ++ ) {
 
       const randomX = ( Math.random() * 6 - 3 ) * radius;
@@ -73,17 +73,17 @@ class Geometries {
       positions.push( randomY );
       positions.push( randomZ );
 
-      points.push(new Vector3(randomX, randomY, randomZ));
+      points.push(new THREE.Vector3(randomX, randomY, randomZ));
 
       color.setHSL( i / particleCount, 1.0, 0.5 );
       colors.push( color.r, color.g, color.b );
       sizes.push( 20 );
     }
 
-    geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
-    geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
-    geometry.setAttribute( 'size', new Float32BufferAttribute( sizes, 1 ).setUsage( DynamicDrawUsage ) );
-    let particleSystem = new Points( geometry, shaderMaterial );
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+    geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+    geometry.setAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ).setUsage( THREE.DynamicDrawUsage ) );
+    let particleSystem = new THREE.Points( geometry, shaderMaterial );
     particleSystem.sortParticles = true;
 
     // add lines
@@ -112,20 +112,20 @@ class Geometries {
    * @returns {*}
    */
   instanceShapes() {
-    const matrix = new Matrix4();
-    const color = new Color();
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
     let amount = parseInt( window.location.search.substr( 1 ) ) || 10;
-    const dummy = new Object3D();
-    let position = new Vector3();
-    let rotation = new Euler();
-    const quaternion = new Quaternion();
+    const dummy = new THREE.Object3D();
+    let position = new THREE.Vector3();
+    let rotation = new THREE.Euler();
+    const quaternion = new THREE.Quaternion();
     let points = [];
 
     let lastTime = 0;
-    const moveQ = new Quaternion( 0.5, 0.5, 0.5, 0.0 ).normalize();
-    const tmpQ = new Quaternion();
-    const tmpM = new Matrix4();
-    const currentM = new Matrix4();
+    const moveQ = new THREE.Quaternion( 0.5, 0.5, 0.5, 0.0 ).normalize();
+    const tmpQ = new THREE.Quaternion();
+    const tmpM = new THREE.Matrix4();
+    const currentM = new THREE.Matrix4();
 
     const totalMesh = this.createMesh();
 
@@ -146,15 +146,15 @@ class Geometries {
         matrix.setPosition( randomX, randomY , randomZ );
         mesh.setMatrixAt( i, matrix );
 
-        // let identity = new Matrix4().identity();
+        // let identity = new THREE.Matrix4().identity();
         // mesh.getMatrixAt(i, identity);
         //
         // // Get position of each instance and push into points.
-        // var vec = new Vector3();
+        // var vec = new THREE.Vector3();
         // vec.setFromMatrixPosition( identity );
         // points.push(vec);
 
-        points.push(new Vector3(randomX, randomY, randomZ));
+        points.push(new THREE.Vector3(randomX, randomY, randomZ));
 
         // Enable bloom layers
         mesh.layers.enable(1);
@@ -236,42 +236,42 @@ class Geometries {
    */
   createMesh() {
     let instanedMeshs = [];
-    const material = new MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
+    const material = new THREE.MeshStandardMaterial({ roughness: 0.4,metalness: 0.1, transparent: true, opacity: 1 });
     const count = 30;
     const size = 0.8;
 
     // tetrahedron
-    const tetraGeo = new TetrahedronBufferGeometry(size, 0);
-    let tetraShapes = new InstancedMesh( tetraGeo, material, count );
+    const tetraGeo = new THREE.TetrahedronBufferGeometry(size, 0);
+    let tetraShapes = new THREE.InstancedMesh( tetraGeo, material, count );
     tetraShapes.type = "InstancedMesh";
-    tetraShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    tetraShapes.instanceMatrix.setUsage(THREE.DynamicDrawUsage ); // will be updated every frame
     tetraShapes.castShadow = true;
     tetraShapes.receiveShadow = true;
     // instanedMeshs.push(tetraShapes);
 
     // Octahedron
-    const octahedronGeo = new OctahedronBufferGeometry(size, 0);
-    let octahedronGeoShapes = new InstancedMesh( octahedronGeo, material, count );
+    const octahedronGeo = new THREE.OctahedronBufferGeometry(size, 0);
+    let octahedronGeoShapes = new THREE.InstancedMesh( octahedronGeo, material, count );
     octahedronGeoShapes.type = "InstancedMesh";
-    octahedronGeoShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    octahedronGeoShapes.instanceMatrix.setUsage(THREE.DynamicDrawUsage ); // will be updated every frame
     octahedronGeoShapes.castShadow = true;
     octahedronGeoShapes.receiveShadow = true;
     instanedMeshs.push(octahedronGeoShapes);
 
     // Icosahedron
-    const icosahedronGeo = new IcosahedronBufferGeometry(size, 0);
-    let icosahedronGeoShapes = new InstancedMesh( icosahedronGeo, material, count );
+    const icosahedronGeo = new THREE.IcosahedronBufferGeometry(size, 0);
+    let icosahedronGeoShapes = new THREE.InstancedMesh( icosahedronGeo, material, count );
     icosahedronGeoShapes.type = "InstancedMesh";
-    icosahedronGeoShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    icosahedronGeoShapes.instanceMatrix.setUsage(THREE.DynamicDrawUsage ); // will be updated every frame
     icosahedronGeoShapes.castShadow = true;
     icosahedronGeoShapes.receiveShadow = true;
     instanedMeshs.push(icosahedronGeoShapes);
 
     // box
-    const boxGeo = new BoxBufferGeometry(size, size, size);
-    let boxShapes = new InstancedMesh( boxGeo, material, count );
+    const boxGeo = new THREE.BoxBufferGeometry(size, size, size);
+    let boxShapes = new THREE.InstancedMesh( boxGeo, material, count );
     boxShapes.type = "InstancedMesh";
-    boxShapes.instanceMatrix.setUsage(DynamicDrawUsage ); // will be updated every frame
+    boxShapes.instanceMatrix.setUsage(THREE.DynamicDrawUsage ); // will be updated every frame
     boxShapes.castShadow = true;
     boxShapes.receiveShadow = true;
     // instanedMeshs.push(boxShapes);
@@ -286,9 +286,9 @@ class Geometries {
    */
   addLine(_points) {
 
-    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
-    const lineGeo = new BufferGeometry().setFromPoints( _points );
-    const line = new Line( lineGeo, material );
+    const material = new THREE.LineBasicMaterial( { color: new THREE.Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
+    const lineGeo = new THREE.BufferGeometry().setFromPoints( _points );
+    const line = new THREE.Line( lineGeo, material );
 
     // line.tick = (delta) => {
     //   line.geometry.setFromPoints(points);
@@ -309,9 +309,9 @@ class Geometries {
   randomCube() {
     let count = 4;
 
-    const geometry = new BoxBufferGeometry(.8, .8, .8);
-    const material = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
-    const cube = new Mesh(geometry, material);
+    const geometry = new THREE.BoxBufferGeometry(.8, .8, .8);
+    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+    const cube = new THREE.Mesh(geometry, material);
 
     cube.position.x = Math.random() * 40 - 20;
     cube.position.y = Math.random() * 40 - 20;
@@ -343,13 +343,13 @@ class Geometries {
     let count = 50;
     let cubes=[];
     let points = [];
-    let group = new Group();
+    let group = new THREE.Group();
 
-    const geometry = new BoxBufferGeometry(.8, .8, .8);
-    const material = new MeshStandardMaterial({ color: new Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+    const geometry = new THREE.BoxBufferGeometry(.8, .8, .8);
+    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
 
     for (let i=0; i< count; i++) {
-      const cube = new Mesh(geometry, material);
+      const cube = new THREE.Mesh(geometry, material);
 
       cube.position.x = Math.random() * 40 - 20;
       cube.position.y = Math.random() * 40 - 20;
@@ -390,10 +390,10 @@ class Geometries {
    * @returns {*}
    */
   generateShapes() {
-    let dummy = new Object3D();
+    let dummy = new THREE.Object3D();
     const count = 1000;
-    const matrix = new Matrix4();
-    const vector = new Vector4();
+    const matrix = new THREE.Matrix4();
+    const vector = new THREE.Vector4();
     const positions = [];
     const offsets = [];
     const colors = [];
@@ -427,39 +427,39 @@ class Geometries {
       orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
     }
 
-    const geometry = new InstancedBufferGeometry();
+    const geometry = new THREE.InstancedBufferGeometry();
     geometry.instanceCount = count;
-    geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
-    geometry.setAttribute( 'offset', new InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
-    geometry.setAttribute( 'color', new InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
-    geometry.setAttribute( 'orientationStart', new InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
-    geometry.setAttribute( 'orientationEnd', new InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+    geometry.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+    geometry.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+    geometry.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
+    geometry.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
 
-    const material = new RawShaderMaterial( {
+    const material = new THREE.RawShaderMaterial( {
       uniforms: {
         "time": { value: 1.0 },
         "sineTime": { value: 1.0 }
       },
       vertexShader: document.getElementById( 'vertexShader' ).textContent,
       fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-      side: DoubleSide,
+      side: THREE.DoubleSide,
       transparent: true
     } );
 
     // const mesh = new Mesh( geometry, material );
-    const mesh = new InstancedMesh( geometry, material, count );
+    const mesh = new THREE.InstancedMesh( geometry, material, count );
     mesh.type = "InstancedMesh";
     mesh.scale.setScalar(Math.random()*50);
 
-    /*var defaultTransform = new Matrix4().multiply( new Matrix4().makeScale( 0.75, 0.75, 0.75 ) )
+    /*var defaultTransform = new THREE.Matrix4().multiply( new THREE.Matrix4().makeScale( 0.75, 0.75, 0.75 ) )
     geometry.applyMatrix4( defaultTransform );
 
-    mesh.instanceMatrix.setUsage( DynamicDrawUsage );
+    mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
 
     for ( var i = 0; i < count; i++ ) { // Iterate and offset x pos
 
       var dummyOffset = -100*i;
-      dummy.position.copy( new Vector3( 0,-15, dummyOffset ) );
+      dummy.position.copy( new THREE.Vector3( 0,-15, dummyOffset ) );
       dummy.updateMatrix();
       mesh.setMatrixAt( i, dummy.matrix );
     }
@@ -494,9 +494,9 @@ class Geometries {
    * @returns {*}
    */
   makeLineBetweenPoints() {
-    const material = new LineBasicMaterial( { color: new Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
-    const lineGeo = new BufferGeometry().setFromPoints( points );
-    const line = new Line( lineGeo, material );
+    const material = new THREE.LineBasicMaterial( { color: new THREE.Color(0xffffff).convertSRGBToLinear(), linewidth: 1, transparent: true, opacity: .1 } );
+    const lineGeo = new THREE.BufferGeometry().setFromPoints( points );
+    const line = new THREE.Line( lineGeo, material );
 
     line.tick = (delta) => {
       line.geometry.setFromPoints(points);
@@ -511,10 +511,10 @@ class Geometries {
  * @type {(function(*): void)|*}
  */
 const randomizeMatrix = function() {
-  const position = new Vector3();
-  const rotation = new Euler();
-  const quaternion = new Quaternion();
-  const scale = new Vector3();
+  const position = new THREE.Vector3();
+  const rotation = new THREE.Euler();
+  const quaternion = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
 
   return function(matrix) {
 
