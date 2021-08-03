@@ -1,5 +1,3 @@
-// import { Clock } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-
 const clock = new THREE.Clock();
 
 class Loop {
@@ -42,4 +40,4 @@ class Loop {
   }
 }
 
-export {Loop};
+export { Loop };

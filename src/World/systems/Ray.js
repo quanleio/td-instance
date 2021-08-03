@@ -1,9 +1,3 @@
-// import {
-//   Raycaster,
-//   Vector2,
-//   Color,
-// } from "https://unpkg.com/three@0.130.0/build/three.module.js";
-
 class Ray {
   constructor(scene, camera) {
     this.camera = camera;
@@ -19,10 +13,10 @@ class Ray {
       this.raycaster.params.Points.threshold = 0.1;
 
       let objects = [];
-      this.scene.children.forEach(child => {
-        if (child.type === 'Line' || child.name === 'TRUNK') return;
+      this.scene.children.forEach((child) => {
+        if (child.type === "Line" || child.name === "TRUNK") return;
         objects.push(child);
-      })
+      });
 
       // const intersects = this.raycaster.intersectObjects(this.scene.children);
       const intersects = this.raycaster.intersectObjects(objects);
@@ -37,12 +31,15 @@ class Ray {
 
       switch (INTERSECTED.type) {
         case "Mesh":
-          INTERSECTED.material.color.set( color.setHex(Math.random() * 0xffffff) );
+          INTERSECTED.material.color.set(
+            color.setHex(Math.random() * 0xffffff)
+          );
           break;
-        case 'Line': break;
-        case 'Points':
+        case "Line":
+          break;
+        case "Points":
           const pointIndex = intersects[0].index;
-          console.error('pointIndex:', pointIndex, 'point:', intersects[0]);
+          console.error("pointIndex:", pointIndex, "point:", intersects[0]);
 
           // let newColor = color.setHex(Math.random() * 0xffffff);
           // intersects[0].object.geometry.colors[pointIndex] = newColor;
@@ -51,9 +48,12 @@ class Ray {
           break;
         case "InstancedMesh":
           const instanceId = intersects[0].instanceId;
-          console.error('instanceId:', instanceId);
+          console.error("instanceId:", instanceId);
 
-          intersects[0].object.setColorAt( instanceId, color.setHex(Math.random() * 0xffffff));
+          intersects[0].object.setColorAt(
+            instanceId,
+            color.setHex(Math.random() * 0xffffff)
+          );
           intersects[0].object.instanceColor.needsUpdate = true;
           break;
       }

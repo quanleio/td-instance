@@ -1,18 +1,3 @@
-// import {
-//   BufferGeometryLoader,
-//   TextureLoader,
-//   MeshPhongMaterial,
-//   MeshBasicMaterial,
-//   InstancedMesh,
-//   Object3D,
-//   Color,
-//   Vector3,
-//   Matrix4,
-//   MathUtils,
-//   Euler,
-//   Quaternion
-// } from "https://unpkg.com/three@0.130.0/build/three.module.js";
-
 /**
  * Load BufferGeometry to make mesh.
  * @returns {Promise<unknown>}
@@ -20,18 +5,17 @@
 function loadSuzanne() {
   return new Promise((resolve, reject) => {
     new THREE.BufferGeometryLoader().load(
-      'assets/suzanne_buffergeometry.json',
+      "assets/suzanne_buffergeometry.json",
       (buffGeo) => {
         buffGeo.computeVertexNormals();
 
-        makeInstance(buffGeo).then(_instancedMesh => {
-
+        makeInstance(buffGeo).then((_instancedMesh) => {
           const radiansPerSecond = THREE.MathUtils.degToRad(30);
 
           // this method will be called once per frame
-          _instancedMesh.tick = ( delta ) => {
+          _instancedMesh.tick = (delta) => {
             // _instancedMesh.rotation.y += radiansPerSecond * delta;
-          }
+          };
 
           resolve(_instancedMesh);
         });
@@ -49,13 +33,15 @@ function loadSuzanne() {
 function loadSakura() {
   return new Promise((resolve, reject) => {
     new THREE.BufferGeometryLoader().load(
-        "assets/sakura.json",
-        (buffGeo) => {
-          buffGeo.computeVertexNormals();
-          makeInstanceWithRandomPos(buffGeo).then(_instancedMesh => resolve(_instancedMesh));
-        },
-        onProgress,
-        onError
+      "assets/sakura.json",
+      (buffGeo) => {
+        buffGeo.computeVertexNormals();
+        makeInstanceWithRandomPos(buffGeo).then((_instancedMesh) =>
+          resolve(_instancedMesh)
+        );
+      },
+      onProgress,
+      onError
     );
   });
 }
@@ -79,7 +65,11 @@ function makeInstance(_buffGeo) {
         const material = new THREE.MeshPhongMaterial();
         const color = new THREE.Color();
 
-        let instancedMesh = new THREE.InstancedMesh(_buffGeo, material, instancedCount);
+        let instancedMesh = new THREE.InstancedMesh(
+          _buffGeo,
+          material,
+          instancedCount
+        );
         instancedMesh.type = "InstancedMesh";
 
         for (let i = 0; i < instanceData.length; i++) {
@@ -112,16 +102,17 @@ function makeInstanceWithRandomPos(_buffGeo) {
     const dummy = new THREE.Object3D();
     let points = [];
 
-    let textureLeaf = new THREE.TextureLoader().load("assets/branch.002_baseColor.png");
-    let material = new THREE.MeshBasicMaterial( {
-      map: textureLeaf
-    } );
+    let textureLeaf = new THREE.TextureLoader().load(
+      "assets/branch.002_baseColor.png"
+    );
+    let material = new THREE.MeshBasicMaterial({
+      map: textureLeaf,
+    });
 
     let instancedMesh = new THREE.InstancedMesh(_buffGeo, material, count);
     instancedMesh.type = "InstancedMesh";
 
     for (let i = 0; i < count; i++) {
-
       // set position
       randomizeMatrix(matrix);
       instancedMesh.setMatrixAt(i, matrix);
@@ -143,15 +134,13 @@ function makeInstanceWithRandomPos(_buffGeo) {
  * Random position for each object
  * @type {(function(*): void)|*}
  */
-const randomizeMatrix = function() {
-
+const randomizeMatrix = (function () {
   const position = new THREE.Vector3();
   const rotation = new THREE.Euler();
   const quaternion = new THREE.Quaternion();
   const scale = new THREE.Vector3();
 
-  return function(matrix) {
-
+  return function (matrix) {
     position.x = Math.random() * 40 - 20;
     position.y = Math.random() * 40 - 20;
     position.z = Math.random() * 40 - 20;
@@ -162,13 +151,11 @@ const randomizeMatrix = function() {
 
     quaternion.setFromEuler(rotation);
 
-    scale.x = scale.y = scale.z = Math.random() * 1/2;
+    scale.x = scale.y = scale.z = (Math.random() * 1) / 2;
 
     matrix.compose(position, quaternion, scale);
-
   };
-
-}();
+})();
 
 /**
  * Show the progress of loading model

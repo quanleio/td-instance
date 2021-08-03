@@ -1,22 +1,20 @@
-// import { PMREMGenerator, UnsignedByteType } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-// import { RGBELoader } from '../../vendor2/RGBELoader.js';
-import {createCamera} from './components/camera.js';
-import {createScene} from './components/scene.js';
-import {loadSakura, loadSuzanne} from './components/model.js';
-import { createDirLight, createHemiLight} from './components/lights.js';
-import { Geometries } from './components/Geometries.js';
-import { ProceduralTree } from './components/ProceduralTree.js';
-import { createRenderer} from './systems/renderer.js';
-import { createControl} from './systems/controls.js';
-import {Loop} from './systems/Loop.js';
-import {Resizer} from './systems/Resizer.js';
-import {Ray} from './systems/Ray.js';
-import {SceneComposer} from './systems/SceneComposer.js';
+import { createCamera } from "./components/camera.js";
+import { createScene } from "./components/scene.js";
+import { loadSakura, loadSuzanne } from "./components/model.js";
+import { createDirLight, createHemiLight } from "./components/lights.js";
+import { Geometries } from "./components/Geometries.js";
+import { ProceduralTree } from "./components/ProceduralTree.js";
+import { createRenderer } from "./systems/renderer.js";
+import { createControl } from "./systems/controls.js";
+import { Loop } from "./systems/Loop.js";
+import { Resizer } from "./systems/Resizer.js";
+import { Ray } from "./systems/Ray.js";
+import { SceneComposer } from "./systems/SceneComposer.js";
 
 // These variables are module-scoped: we cannot access them
 // from outside the module
 let camera, scene, renderer, controls, loop;
-let composer={};
+let composer = {};
 
 class World {
   constructor() {
@@ -54,10 +52,10 @@ class World {
     loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
-    instancedShapes.forEach(shape => {
+    instancedShapes.forEach((shape) => {
       scene.add(shape);
       loop.updatables.push(shape);
-    })
+    });
 
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
@@ -69,12 +67,17 @@ class World {
 
     // proctree.js
     let procTree = new ProceduralTree();
-    const groupTree1 = procTree.createTreeGroup('groupTree1', 6 );
-    const groupTree2 = procTree.createTreeGroup('groupTree2', 6 );
-    const groupTree3 = procTree.createTreeGroup('groupTree3', 6 );
-    const groupTree4 = procTree.createTreeGroup('groupTree4', 6 );
+    const groupTree1 = procTree.createTreeGroup("groupTree1", 6);
+    const groupTree2 = procTree.createTreeGroup("groupTree2", 6);
+    const groupTree3 = procTree.createTreeGroup("groupTree3", 6);
+    const groupTree4 = procTree.createTreeGroup("groupTree4", 6);
     scene.add(groupTree1, groupTree2, groupTree3, groupTree4);
-    loop.updatables.push(groupTree1.children[0], groupTree2.children[0], groupTree3.children[0], groupTree4.children[0]);
+    loop.updatables.push(
+      groupTree1.children[0],
+      groupTree2.children[0],
+      groupTree3.children[0],
+      groupTree4.children[0]
+    );
 
     /*let level = 3;
     setTimeout(() => {
@@ -117,29 +120,28 @@ class World {
     //   scene.add(_model);
     // })
 
-    console.error(scene)
+    console.error(scene);
 
     // Set background for scene as image
-    let pmremGenerator = new THREE.PMREMGenerator( renderer );
+    let pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
     new THREE.RGBELoader()
-    .setDataType( THREE.UnsignedByteType )
-    .setPath( './assets/' )
-    .load( 'royal_esplanade_1k.hdr', function ( texture ) {
+      .setDataType(THREE.UnsignedByteType)
+      .setPath("./assets/")
+      .load("royal_esplanade_1k.hdr", function (texture) {
+        let envMap = pmremGenerator.fromEquirectangular(texture).texture;
 
-      let envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+        // scene.background = envMap;
+        scene.environment = envMap;
 
-      // scene.background = envMap;
-      scene.environment = envMap;
-
-      texture.dispose();
-      pmremGenerator.dispose();
-    });
+        texture.dispose();
+        pmremGenerator.dispose();
+      });
 
     // control
     controls = createControl(camera, renderer);
-    controls.addEventListener('change', this.render);
+    controls.addEventListener("change", this.render);
 
     // ray
     new Ray(scene, camera);
@@ -161,4 +163,4 @@ class World {
   }
 }
 
-export { World }
+export { World };

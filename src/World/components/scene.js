@@ -1,8 +1,8 @@
-
-// import { Scene, Color, FogExp2 } from 'https://unpkg.com/three@0.130.0/build/three.module.js';
-
+/**
+ * Create Scene
+ * @returns {*}
+ */
 function createScene() {
-
   const scene = new THREE.Scene();
   const backgroundColor = new THREE.Color(0xeceddc).convertSRGBToLinear();
   // scene.background = backgroundColor;
@@ -11,4 +11,4 @@ function createScene() {
   return scene;
 }
 
-export {createScene}
+export { createScene };
