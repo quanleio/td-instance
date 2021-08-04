@@ -214,7 +214,7 @@ class Geometries {
       opacity: 1,
     });
     const count = 30;
-    const size = 0.8;
+    const size = 1.2;
 
     // tetrahedron
     const tetraGeo = new THREE.TetrahedronBufferGeometry(size, 0);

@@ -66,18 +66,18 @@ class World {
     // })
 
     // proctree.js
-    let procTree = new ProceduralTree();
-    const groupTree1 = procTree.createTreeGroup("groupTree1", 6);
-    const groupTree2 = procTree.createTreeGroup("groupTree2", 6);
-    const groupTree3 = procTree.createTreeGroup("groupTree3", 6);
-    const groupTree4 = procTree.createTreeGroup("groupTree4", 6);
-    scene.add(groupTree1, groupTree2, groupTree3, groupTree4);
-    loop.updatables.push(
-      groupTree1.children[0],
-      groupTree2.children[0],
-      groupTree3.children[0],
-      groupTree4.children[0]
-    );
+    // let procTree = new ProceduralTree();
+    // const groupTree1 = procTree.createTreeGroup("groupTree1", 6);
+    // const groupTree2 = procTree.createTreeGroup("groupTree2", 6);
+    // const groupTree3 = procTree.createTreeGroup("groupTree3", 6);
+    // const groupTree4 = procTree.createTreeGroup("groupTree4", 6);
+    // scene.add(groupTree1, groupTree2, groupTree3, groupTree4);
+    // loop.updatables.push(
+    //   groupTree1.children[0],
+    //   groupTree2.children[0],
+    //   groupTree3.children[0],
+    //   groupTree4.children[0]
+    // );
 
     /*let level = 3;
     setTimeout(() => {
