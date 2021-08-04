@@ -22,6 +22,10 @@ class Ray {
 
     let INTERSECTED = null;
     const matrix = new THREE.Matrix4();
+    let position = new THREE.Vector3();
+    let rotation = new THREE.Euler();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
 
     window.addEventListener("click", (ev) => {
       this.mouse.x = (ev.clientX / window.innerWidth) * 2 - 1;
@@ -46,7 +50,24 @@ class Ray {
 
         (intersects[0].object instanceof THREE.Mesh ) ? document.body.style.cursor = "pointer" : document.body.style.cursor = "default";
 
+        /*if (intersects[0].object instanceof THREE.Mesh) {
+
+          INTERSECTED = intersects[0].object;
+          let instanceId = intersects[0].instanceId;
+          INTERSECTED.getMatrixAt( instanceId, matrix );
+          matrix.decompose(position, quaternion, scale);
+
+          // change scale
+          scale.x *= 1.2;
+          scale.y *= 1.2;
+          scale.z *= 1.2;
+
+          // write scale back to matrix
+          matrix.scale( scale );
+          INTERSECTED.setMatrixAt( instanceId, matrix );
+        }*/
       }
+      else document.body.style.cursor = "default";
     });
 
     // For mobile
@@ -221,6 +242,10 @@ class Ray {
       z: pos.z,
       ease: Power1.easeInOut
     });
+  }
+
+  zoomObject(scale) {
+
   }
 
   setColor(intersects) {
