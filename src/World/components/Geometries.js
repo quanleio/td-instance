@@ -34,6 +34,7 @@ class Geometries {
 
     const geometry = new THREE.BufferGeometry();
     for (let i = 0; i < particleCount; i++) {
+
       const randomX = (Math.random() * 6 - 3) * radius;
       const randomY = (Math.random() * 6 - 3) * radius;
       const randomZ = (Math.random() * 6 - 3) * radius;
@@ -207,14 +208,28 @@ class Geometries {
    */
   createMesh() {
     let instanedMeshs = [];
+    const count = 30;
+    const size = 1.2;
+    // const texture = new THREE.TextureLoader().load( 'assets/bubble.png' );
     const material = new THREE.MeshStandardMaterial({
       roughness: 0.4,
       metalness: 0.1,
       transparent: true,
-      opacity: 1,
+      opacity: 1
     });
-    const count = 30;
-    const size = 1.2;
+
+    // Sphere
+    const sphereGeo = new THREE.SphereBufferGeometry(size, 32, 32);
+    let sphereShapes = new THREE.InstancedMesh(
+        sphereGeo,
+        material,
+        count
+    );
+    sphereShapes.type = "InstancedMesh";
+    sphereShapes.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+    sphereShapes.castShadow = true;
+    sphereShapes.receiveShadow = true;
+    // instanedMeshs.push(sphereShapes);
 
     // tetrahedron
     const tetraGeo = new THREE.TetrahedronBufferGeometry(size, 0);
@@ -261,6 +276,71 @@ class Geometries {
     // instanedMeshs.push(boxShapes);
 
     return instanedMeshs;
+  }
+
+  randomStars() {
+    var rs = [];
+    var shape = [];
+    var pos = {
+      x : 0,
+      y : 0,
+      z : 0
+    }
+    var color = "#fc6bcf";
+
+    for(var x = 0; x < 500; x++) {
+      const phongMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color("#fff"), emissive: new THREE.Color("#35bad8"), specular: 0x111111, shininess: 100 }); // need dir light
+
+      // const material = new THREE.MeshStandardMaterial({
+      //   color: new THREE.Color("#fff") * Math.random(),
+      //   roughness: 0.4,
+      //   metalness: 0.1,
+      //   transparent: true,
+      //   opacity: 1,
+      // });
+
+      // material = new THREE.MeshPhongMaterial({
+      //   color      : new THREE.Color("#fff"),
+      //   emissive   : new THREE.Color("#35bad8"),
+      //   shininess  : new THREE.Color("#fff"),
+      //   shininess  :  100,
+      //   shading    :  THREE.FlatShading,
+      // });
+      if(x %2 === 0) {
+        phongMaterial.emissive = new THREE.Color(color);
+      }
+
+      pos.x = this.getRandomArbitrary(-(window.innerWidth+500), window.innerWidth+500);
+      pos.y = this.getRandomArbitrary(-(window.innerHeight+1000),window.innerHeight+1000);
+      pos.z = this.getRandomArbitrary(0, 1000);
+
+      rs[x] = new THREE.TetrahedronBufferGeometry(this.getRandomArbitrary(2,20), 0);
+      shape[x] = new THREE.Mesh(rs[x], phongMaterial);
+      shape[x].castShadow = true;
+      shape[x].position.set(pos.x,pos.y,pos.z);
+      shape[x].layers.enable(1)
+    }
+
+    shape.forEach(shape => {
+      shape.tick = () => {
+        shape.position.z -= 5;
+
+        if(shape.position.z < -1000) {
+          shape.position.z = this.getRandomArbitrary(0,1000)
+        }
+
+        // shape.position.y += 500;
+        // if(shape.position.y < - 1000) {
+        //   shape.position.y = this.getRandomArbitrary(0,1000)
+        // }
+      }
+    })
+
+    return shape;
+  }
+
+  getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
   }
 
   /**

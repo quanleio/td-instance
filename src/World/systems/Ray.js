@@ -50,22 +50,24 @@ class Ray {
 
         (intersects[0].object instanceof THREE.Mesh ) ? document.body.style.cursor = "pointer" : document.body.style.cursor = "default";
 
-        /*if (intersects[0].object instanceof THREE.Mesh) {
+        if (intersects[0].object instanceof THREE.Mesh) {
 
-          INTERSECTED = intersects[0].object;
-          let instanceId = intersects[0].instanceId;
-          INTERSECTED.getMatrixAt( instanceId, matrix );
-          matrix.decompose(position, quaternion, scale);
+          // INTERSECTED = intersects[0].object;
+          // let instanceId = intersects[0].instanceId;
+          // INTERSECTED.material.opacity = .2;
 
-          // change scale
-          scale.x *= 1.2;
-          scale.y *= 1.2;
-          scale.z *= 1.2;
-
-          // write scale back to matrix
-          matrix.scale( scale );
-          INTERSECTED.setMatrixAt( instanceId, matrix );
-        }*/
+          // INTERSECTED.getMatrixAt( instanceId, matrix );
+          // matrix.decompose(position, quaternion, scale);
+          //
+          // // change scale
+          // scale.x *= 1.2;
+          // scale.y *= 1.2;
+          // scale.z *= 1.2;
+          //
+          // // write scale back to matrix
+          // matrix.scale( scale );
+          // INTERSECTED.setMatrixAt( instanceId, matrix );
+        }
       }
       else document.body.style.cursor = "default";
     });
@@ -137,7 +139,7 @@ class Ray {
           let instanceId = intersects[0].instanceId;
           INTERSECTED.getMatrixAt( instanceId, matrix );
           matrix.decompose(this.dummy.position, this.dummy.quaternion, this.dummy.scale);
-          this.zoomInCameraToPosition(this.dummy.position)
+          // this.zoomInCameraToPosition(this.dummy.position);
 
           TweenMax.to(INTERSECTED.material, 1.5, {
             opacity: 0,
@@ -157,7 +159,7 @@ class Ray {
           });
         }
         INTERSECTED = null;
-        this.resetCamera();
+        // this.resetCamera();
       }
     });
   }
@@ -235,12 +237,12 @@ class Ray {
   }
 
   zoomInCameraToPosition(pos){
-    console.error('zoom camera:', pos)
+    console.error('zoomInCameraToPosition:', pos)
     TweenMax.to(this.camera.position, 2, {
       x: pos.x,
       y: pos.y,
       z: pos.z,
-      ease: Power1.easeInOut
+      ease: Power1.easeInOut,
     });
   }
 

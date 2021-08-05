@@ -8,16 +8,19 @@ function createCamera() {
   // const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
   // camera.position.z = 5;
 
-  const camera = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    1,
-    1000
-  );
-  camera.position.set(-1, 0, 120);
+  // const camera = new THREE.PerspectiveCamera(
+  //   45,
+  //   window.innerWidth / window.innerHeight,
+  //   1,
+  //   1000
+  // );
+  // camera.position.set(-1, 0, 120);
 
-  const helper = new THREE.CameraHelper(camera);
-  camera.add(helper);
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 25;
+
+  // const helper = new THREE.CameraHelper(camera);
+  // camera.add(helper);
 
   return camera;
 }

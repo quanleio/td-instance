@@ -57,6 +57,18 @@ class World {
       loop.updatables.push(shape);
     });
 
+    const randomStars = geometryShape.randomStars();
+    randomStars.forEach(star =>{
+      scene.add(star);
+      loop.updatables.push(star);
+    })
+
+    // const tree = new ProceduralTree().genDraw();
+    // tree.forEach( t => {
+      // scene.add(t);
+      // loop.updatables.push(t)
+    // })
+
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
     //   branch.forEach(_branch => {

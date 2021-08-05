@@ -32,6 +32,23 @@ let nEnd = 0;
 let nMax,
   nStep = 90;
 
+let figureShape = {
+  Structure: 1,
+  prev: 0,
+  angle: 22, // Angle in degrees, gets converted into radiance in turtle during rendering
+  'n (Iterations)': 4, // Number of iterations when generating sentence
+  Axiom: 'F',
+};
+let rules = [];
+let sentence = figureShape.Axiom;
+let colorMaterial = [];
+colorMaterial[0] = new THREE.MeshLambertMaterial({color: 0xcf2734});
+colorMaterial[1] = new THREE.MeshLambertMaterial({color: 0xffffff});
+colorMaterial[2] = new THREE.MeshLambertMaterial({color: 0x009343});
+let currentColorIndex = 0;
+
+
+
 class ProceduralTree {
   constructor() {
     this.config = DEFAULT_CONFIG;
@@ -56,27 +73,22 @@ class ProceduralTree {
     // trunk
     const treeGeometry = new THREE.BufferGeometry();
     treeGeometry.setAttribute("position", createFloatAttribute(tree.verts, 3));
-    treeGeometry.setAttribute(
-      "normal",
-      normalizeAttribute(createFloatAttribute(tree.normals, 3))
-    );
+    treeGeometry.setAttribute("normal",normalizeAttribute(createFloatAttribute(tree.normals, 3)));
     treeGeometry.setAttribute("uv", createFloatAttribute(tree.UV, 2));
     treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
-    console.error(treeGeometry);
+    // console.error(treeGeometry);
     nMax = treeGeometry.attributes.position.count;
 
-    // fixed color
+    // Color
     let colorValue = parseInt(colorHex.replace("#", "0x"), 16);
     let colored = new THREE.Color(colorValue);
+    colored.setHex( Math.random() * 0xffffff );
 
     // Random Color
-    // let randomColor = new Color( 0xffffff );
+    // let randomColor = new THREE.Color( 0xffffff );
     // randomColor.setHex( Math.random() * 0xffffff );
-    // colored.setHex( Math.random() * 0xffffff );
     const treeMaterial = new THREE.MeshStandardMaterial({
       color: colored,
-      roughness: 1.0,
-      metalness: 0.1,
       transparent: true,
       opacity: 0,
     });
@@ -92,17 +104,28 @@ class ProceduralTree {
       trunk.layers.enable(1);
     }
 
-    trunk.tick = () => {
+    trunk.tick = (delta) => {
       if (trunk.material.opacity < 0.6) {
         trunk.material.opacity += 0.005;
       }
 
       nEnd = Math.max(nEnd + nStep, nMax);
       treeGeometry.setDrawRange(0, nEnd);
+
+      // let timestamp = new Date() * 0.0005;
+      // const angle = this.map(Math.sin(timestamp * 0.001 + Math.random() * 2), -1, 1, -this.rad(5), this.rad(5));
+      // trunk.rotation.y = angle * 3;
+      // trunk.rotation.z = angle;
+
     };
 
     return trunk;
   }
+
+  map = (value, sMin, sMax, dMin, dMax) => {
+    return dMin + ((value - sMin) / (sMax - sMin)) * (dMax - dMin);
+  };
+  rad = (deg) => (deg / 180) * Math.PI;
 
   /**
    * Create group of tree. Each group has 4 trees.
@@ -273,6 +296,250 @@ class ProceduralTree {
     // return group;
 
     return group;
+  }
+
+  genDraw() {
+    this.rulechange();
+
+    sentence = figureShape.Axiom;
+    let interation = figureShape["n (Iterations)"];
+
+    for (let i = 0; i < interation ; i++) {
+      this.generate();
+    }
+    return this.turtle();
+  }
+
+  rulechange() {
+
+    rules = [];
+
+    if (figureShape.Structure === 1) {
+      figureShape.angle = 22; // Conversion from degrees to radians
+      figureShape['n (Iterations)'] = 4; // Number of iterations when generating sentence
+      figureShape.Axiom = 'F';
+
+      rules[0] = {
+        a: 'F',
+        b: 'F´[+F´]F´[-F´]/F´',
+        c: 'F´[+F´]^F´',
+        d: 'F´+F´/F´',
+        bpro: 33,
+        cpro: 33,
+      };
+    }
+  }
+  generate() {
+    let nextSentence = '';
+    for (let i = 0; i < sentence.length; i++) {
+      let current = sentence.charAt(i);
+      let found = false;
+      for (let j = 0; j < rules.length; j++) {
+        if (current === rules[j].a) {
+          found = true;
+          let rand = Math.floor(Math.random() * 101);
+          if (rand < rules[j].bpro) {
+            nextSentence += rules[j].b;
+          }
+          else if (rand < rules[j].bpro + rules[j].cpro) {
+            nextSentence += rules[j].c;
+          }
+          else {
+            nextSentence += rules[j].d;
+          }
+          break;
+        }
+      }
+      if (!found) {
+        nextSentence += current;
+      }
+    }
+    sentence = nextSentence;
+    console.log(sentence);
+  }
+  turtle() {
+    let angle = figureShape.angle * Math.PI / 180;
+    let turtle = {
+      pos: new THREE.Vector3(0, -10, 0), // position of the tree
+      // Up, Left, Head, can be compared to yaw, pitch, roll
+      hlu: new THREE.Matrix3().set(0, 1, 0,
+          1, 0, 0,
+          0, 0, -1),
+      len: 1,
+      scalar: 1,
+    };
+    let edgeMeshs = [];
+
+    // Stack
+    let turtleHistory = [turtle];
+
+    // Rotational matrices
+    let RuPos = new THREE.Matrix3().set(Math.cos(angle), Math.sin(angle), 0,
+        -Math.sin(angle), Math.cos(angle), 0,
+        0, 0, 1);
+    let RuNeg = new THREE.Matrix3().set(Math.cos(-angle), Math.sin(-angle), 0,
+        -Math.sin(-angle), Math.cos(-angle), 0,
+        0, 0, 1);
+    let RlPos = new THREE.Matrix3().set(Math.cos(angle), 0, -Math.sin(angle),
+        0, 1, 0,
+        Math.sin(angle), 0, Math.cos(angle));
+    let RlNeg = new THREE.Matrix3().set(Math.cos(-angle), 0, -Math.sin(-angle),
+        0, 1, 0,
+        Math.sin(-angle), 0, Math.cos(-angle));
+    let RhPos = new THREE.Matrix3().set(1, 0, 0,
+        0, Math.cos(angle), -Math.sin(angle),
+        0, Math.sin(angle), Math.cos(angle));
+    let RhNeg = new THREE.Matrix3().set(1, 0, 0,
+        0, Math.cos(-angle), -Math.sin(-angle),
+        0, Math.sin(-angle), Math.cos(-angle));
+    let Ru180 = new THREE.Matrix3().set(Math.cos(Math.PI), Math.sin(Math.PI), 0,
+        -Math.sin(Math.PI), Math.cos(Math.PI), 0,
+        0, 0, 1);
+
+    let count = sentence.length;
+    var branches = [];
+    for (let i = 0; i < sentence.length; i++) {
+      let current = sentence.charAt(i);
+
+      // Go forward one step. Draw a cylinder along path.
+      if (current === 'F' || current === 'G') {
+        let point1 = turtle.pos;
+        turtle.len *= turtle.scalar;
+        let temp = new THREE.Vector3(turtle.hlu.elements[0], turtle.hlu.elements[1], turtle.hlu.elements[2]);
+
+        temp.multiplyScalar(turtle.len);
+        let point2 = new THREE.Vector3().addVectors(point1, temp);
+
+        let branch = {
+          id: i,
+          point1: point1,
+          point2: point2
+        }
+        branches.push(branch);
+        // const edgeMesh = this.cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i);
+        // edgeMeshs.push(edgeMesh);
+
+        turtle.pos = point2;
+      }
+
+      // Go forward one step without drawing anything.
+      else if (current === 'X' || current === 'f') {
+        let point1 = turtle.pos;
+
+        let temp = new THREE.Vector3(turtle.hlu.elements[0], turtle.hlu.elements[1], turtle.hlu.elements[2]);
+        let point2 = new THREE.Vector3().addVectors(point1, temp);
+
+        turtle.pos = point2;
+      }
+      // Rotations around H, L or U
+      else if (current === '-') {
+        turtle.hlu.multiply(RuPos);
+      } else if (current === '+') {
+        turtle.hlu.multiply(RuNeg);
+      } else if (current === '&') {
+        turtle.hlu.multiply(RlPos);
+      } else if (current === '^') {
+        turtle.hlu.multiply(RlNeg);
+      } else if (current === '/') {
+        turtle.hlu.multiply(RhPos);
+      } else if (current === '\\') {
+        turtle.hlu.multiply(RhNeg);
+      } else if (current === '|') {
+        turtle.hlu.multiply(Ru180);
+      }
+      // Save current state in stack
+      else if (current === '[') {
+        turtleHistory.push({pos: turtle.pos, hlu: turtle.hlu.clone(), len: turtle.len, scalar: turtle.scalar});
+        turtle = turtleHistory[turtleHistory.length - 1];
+      }
+      // Go back to last saved state in stack and remove it from stack
+      else if (current === ']') {
+        turtleHistory.pop();
+        turtle = turtleHistory[turtleHistory.length - 1];
+      }
+          // Rotate the turtle to vertical.
+      // Inte testad än
+      else if (current === '$') {
+        // L = (V x H) / |V x H|
+        let V = new THREE.Vector3(0, 1, 0); // V = direction opposite to gravity
+        let H = new THREE.Vector3(turtle.hlu.elements[0], turtle.hlu.elements[1], turtle.hlu.elements[2]);
+        let L = V.cross(H).divide(V.cross(H).normalize());
+
+        let U = H.cross(L);
+
+        turtle.hlu.set(H.x, L.x, U.x,
+            H.y, L.y, U.y,
+            H.z, L.z, U.z);
+      }
+      // Decrement the diameter of segments
+      else if (current === '!') {
+
+      }
+      // Increment the current color index
+      else if (current === '´') {
+        currentColorIndex = (currentColorIndex + 1) % colorMaterial.length;
+      }
+    }
+
+    console.error(branches);
+    this.cylinderMesh(branches)
+    // branches.forEach(br => {
+    //   const edgeMesh = this.cylinderMesh(br.point1, br.point2, colorMaterial[currentColorIndex], branches.length);
+    //   edgeMeshs.push(edgeMesh);
+    // })
+
+    console.warn(edgeMeshs)
+    return edgeMeshs;
+
+  }
+  // cylinderMesh(pointX, pointY, material, count) {
+  cylinderMesh(branches) {
+
+    // let direction = new THREE.Vector3().subVectors(pointY, pointX);
+    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 20, 8, 1);
+    // let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, direction.length(), 8, 1);
+    let standardMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.4,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 1
+    });
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+
+    let edge = new THREE.InstancedMesh(edgeGeometry, standardMaterial, branches.length);
+    edge.type = "InstancedMesh";
+    edge.name = "edge";
+    edge.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+    edge.scale.setScalar(1.5)
+    for (let i = 0; i < edge.count; i++) {
+      // color
+      edge.setColorAt(i, color.setHex(0xcf2734));
+
+      // position
+      const randomX = (pointY.x + pointX.x) / 2;
+      const randomY = (pointY.y + pointX.y) / 2;
+      const randomZ = (pointY.z + pointX.z) / 2;
+      matrix.setPosition(randomX, randomY, randomZ);
+      edge.setMatrixAt(i, matrix);
+
+      // orientation
+      edge.getMatrixAt(i, matrix);
+      matrix.lookAt(pointX, pointY, new THREE.Object3D().up);
+      matrix.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
+          0, 0, 1, 0,
+          0, -1, 0, 0,
+          0, 0, 0, 1));
+      edge.setMatrixAt(i, matrix);
+      edge.layers.enable(1)
+    }
+
+    edge.tick = (delta) => {
+
+      // edge.instanceMatrix.needsUpdate = true;
+    };
+
+    return edge;
   }
 
   /**

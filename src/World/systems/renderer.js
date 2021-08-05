@@ -12,6 +12,12 @@ function createRenderer() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
 
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setClearColor( 0xffffff, 0);
+  renderer.shadowMapSoft = true;
+  renderer.autoClear = false;
+
   // set the pixel ratio (for mobile devices)
   // renderer.setPixelRatio(window.devicePixelRatio);
 
