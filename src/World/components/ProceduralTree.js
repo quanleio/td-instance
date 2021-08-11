@@ -368,6 +368,7 @@ class ProceduralTree {
       len: 1,
       scalar: 1,
     };
+
     let edgeMeshs = [];
 
     // Stack
@@ -397,7 +398,6 @@ class ProceduralTree {
         0, 0, 1);
 
     let count = sentence.length;
-    var branches = [];
     for (let i = 0; i < sentence.length; i++) {
       let current = sentence.charAt(i);
 
@@ -410,14 +410,10 @@ class ProceduralTree {
         temp.multiplyScalar(turtle.len);
         let point2 = new THREE.Vector3().addVectors(point1, temp);
 
-        let branch = {
-          id: i,
-          point1: point1,
-          point2: point2
-        }
-        branches.push(branch);
-        // const edgeMesh = this.cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i);
-        // edgeMeshs.push(edgeMesh);
+        // console.error(point1, point2, i, count)
+        // scene.add( cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i) );
+        const edgeMesh = this.cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i);
+        edgeMeshs.push(edgeMesh);
 
         turtle.pos = point2;
       }
@@ -481,23 +477,12 @@ class ProceduralTree {
       }
     }
 
-    console.error(branches);
-    this.cylinderMesh(branches)
-    // branches.forEach(br => {
-    //   const edgeMesh = this.cylinderMesh(br.point1, br.point2, colorMaterial[currentColorIndex], branches.length);
-    //   edgeMeshs.push(edgeMesh);
-    // })
-
-    console.warn(edgeMeshs)
     return edgeMeshs;
 
   }
-  // cylinderMesh(pointX, pointY, material, count) {
-  cylinderMesh(branches) {
-
-    // let direction = new THREE.Vector3().subVectors(pointY, pointX);
-    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 20, 8, 1);
-    // let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, direction.length(), 8, 1);
+  cylinderMesh(pointX, pointY, material, count) {
+    let direction = new THREE.Vector3().subVectors(pointY, pointX);
+    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, direction.length(), 8, 1);
     let standardMaterial = new THREE.MeshStandardMaterial({
       roughness: 0.4,
       metalness: 0.1,
@@ -507,11 +492,10 @@ class ProceduralTree {
     const matrix = new THREE.Matrix4();
     const color = new THREE.Color();
 
-    let edge = new THREE.InstancedMesh(edgeGeometry, standardMaterial, branches.length);
+    let edge = new THREE.InstancedMesh(edgeGeometry, standardMaterial, count);
     edge.type = "InstancedMesh";
     edge.name = "edge";
     edge.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-    edge.scale.setScalar(1.5)
     for (let i = 0; i < edge.count; i++) {
       // color
       edge.setColorAt(i, color.setHex(0xcf2734));
@@ -531,13 +515,11 @@ class ProceduralTree {
           0, -1, 0, 0,
           0, 0, 0, 1));
       edge.setMatrixAt(i, matrix);
-      edge.layers.enable(1)
     }
 
     edge.tick = (delta) => {
-
-      // edge.instanceMatrix.needsUpdate = true;
-    };
+      // animate each edge here...
+    }
 
     return edge;
   }

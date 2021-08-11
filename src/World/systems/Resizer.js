@@ -1,11 +1,11 @@
 class Resizer {
   constructor(camera, renderer, composer) {
     // set initial size
-    setSize(camera, renderer, composer);
+    setSize(camera, renderer )//, composer);
 
     window.addEventListener("resize", () => {
       // set the size again if a resize occurs
-      setSize(camera, renderer, composer);
+      setSize(camera, renderer)// , composer);
       // perform any custom actions
       this.onResize();
     });
@@ -21,8 +21,8 @@ const setSize = (camera, renderer, composer) => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
 
-  composer.bloomComposer.setSize(window.innerWidth, window.innerHeight);
-  composer.sceneComposer.setSize(window.innerWidth, window.innerHeight);
+  // composer.bloomComposer.setSize(window.innerWidth, window.innerHeight);
+  // composer.sceneComposer.setSize(window.innerWidth, window.innerHeight);
 };
 
 export { Resizer };

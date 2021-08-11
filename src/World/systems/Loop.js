@@ -17,10 +17,10 @@ class Loop {
       this.renderer.render(this.scene, this.camera);
 
       // render bloom
-      this.sceneComposer.renderBloom(true);
+      // this.sceneComposer.renderBloom(true);
 
       // render the entire scene, then render bloom scene on top
-      this.sceneComposer.render();
+      // this.sceneComposer.render();
     });
   }
 

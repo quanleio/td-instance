@@ -24,8 +24,7 @@ class SceneComposer {
     this.renderer = _renderer;
 
     const renderScene = new THREE.RenderPass(this.scene, this.camera);
-    const bloomPass = new THREE.UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
+    const bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2(window.innerWidth, window.innerHeight),
       1.5,
       0.4,
       0.85

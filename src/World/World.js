@@ -23,8 +23,8 @@ class World {
     renderer = createRenderer();
 
     // composers
-    const sceneComposer = new SceneComposer(scene, camera, renderer);
-    composer = sceneComposer.getComposers();
+    // const sceneComposer = new SceneComposer(scene, camera, renderer);
+    // composer = sceneComposer.getComposers();
 
     const hemiLight = createHemiLight();
     const dirLight = createDirLight();
@@ -34,7 +34,7 @@ class World {
     const geometryShape = new Geometries();
 
     // loop
-    loop = new Loop(camera, scene, renderer, sceneComposer);
+    loop = new Loop(camera, scene, renderer)// , sceneComposer);
 
     /*const shape = geometryShape.generateShapes();
     scene.add(shape);
@@ -47,27 +47,27 @@ class World {
     // })
 
     // particle
-    const particles = geometryShape.createParticles();
-    scene.add(particles);
-    loop.updatables.push(particles);
+    // const particles = geometryShape.createParticles();
+    // scene.add(particles);
+    // loop.updatables.push(particles);
 
-    const instancedShapes = geometryShape.instanceShapes();
-    instancedShapes.forEach((shape) => {
-      scene.add(shape);
-      loop.updatables.push(shape);
-    });
+    // const instancedShapes = geometryShape.instanceShapes();
+    // instancedShapes.forEach((shape) => {
+    //   scene.add(shape);
+    //   loop.updatables.push(shape);
+    // });
 
-    const randomStars = geometryShape.randomStars();
-    randomStars.forEach(star =>{
-      scene.add(star);
-      loop.updatables.push(star);
-    })
-
-    // const tree = new ProceduralTree().genDraw();
-    // tree.forEach( t => {
-      // scene.add(t);
-      // loop.updatables.push(t)
+    // const randomStars = geometryShape.randomStars();
+    // randomStars.forEach(star =>{
+    //   scene.add(star);
+    //   loop.updatables.push(star);
     // })
+
+    const tree = new ProceduralTree().genDraw();
+    tree.forEach( t => {
+      scene.add(t);
+      loop.updatables.push(t)
+    })
 
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
@@ -159,7 +159,7 @@ class World {
     new Ray(scene, camera);
 
     // resize
-    new Resizer(camera, renderer, composer);
+    new Resizer(camera, renderer)//, composer);
   }
 
   render() {
