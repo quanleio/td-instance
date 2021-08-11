@@ -299,6 +299,7 @@ class ProceduralTree {
   }
 
   genDraw() {
+    let groupTree = [];
     this.rulechange();
 
     sentence = figureShape.Axiom;
@@ -307,7 +308,15 @@ class ProceduralTree {
     for (let i = 0; i < interation ; i++) {
       this.generate();
     }
-    return this.turtle();
+    // return this.turtle();
+
+    let tree1 = this.turtle(); tree1.position.set(-40, 0, 0);
+    let tree2 = this.turtle(); tree2.position.set(0, 0, 0);
+    let tree3 = this.turtle(); tree3.position.set(20, 0, 0);
+    let tree4 = this.turtle(); tree4.position.set(40, 0, 0);
+
+    groupTree.push(tree1, tree2, tree3, tree4);
+    return groupTree;
   }
 
   rulechange() {
@@ -374,6 +383,8 @@ class ProceduralTree {
     // Stack
     let turtleHistory = [turtle];
 
+    let trunks = [];
+
     // Rotational matrices
     let RuPos = new THREE.Matrix3().set(Math.cos(angle), Math.sin(angle), 0,
         -Math.sin(angle), Math.cos(angle), 0,
@@ -397,7 +408,6 @@ class ProceduralTree {
         -Math.sin(Math.PI), Math.cos(Math.PI), 0,
         0, 0, 1);
 
-    let count = sentence.length;
     for (let i = 0; i < sentence.length; i++) {
       let current = sentence.charAt(i);
 
@@ -410,10 +420,10 @@ class ProceduralTree {
         temp.multiplyScalar(turtle.len);
         let point2 = new THREE.Vector3().addVectors(point1, temp);
 
-        // console.error(point1, point2, i, count)
-        // scene.add( cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i) );
-        const edgeMesh = this.cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i);
-        edgeMeshs.push(edgeMesh);
+        let trunk = {id: i, point1: point1, point2: point2, color: colorMaterial[currentColorIndex]}
+        trunks.push(trunk);
+        // const edgeMesh = this.cylinderMesh(point1, point2, colorMaterial[currentColorIndex], i);
+        // edgeMeshs.push(edgeMesh);
 
         turtle.pos = point2;
       }
@@ -477,10 +487,94 @@ class ProceduralTree {
       }
     }
 
-    return edgeMeshs;
+    console.error('all trunks', trunks);
+    return this.makeInstanceTrunk(trunks);
+    // return edgeMeshs;
 
   }
-  cylinderMesh(pointX, pointY, material, count) {
+  makeInstanceTrunk(allTrunks) {
+
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+
+    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 8, 1);
+    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+
+    let instancedMesh = new THREE.InstancedMesh(
+        edgeGeometry,
+        material,
+        allTrunks.length
+    );
+    instancedMesh.type = "InstancedMesh";
+    instancedMesh.name = "edge";
+    instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+
+    // let direction = new THREE.Vector3().subVectors(pointY, pointX);
+
+    for (let i = 0; i < allTrunks.length; i++) {
+      let inst = allTrunks[i];
+      let pointX = inst.point1;
+      let pointY = inst.point2;
+
+      // position
+      const randomX = (pointY.x + pointX.x) / 2;
+      const randomY = (pointY.y + pointX.y) / 2;
+      const randomZ = (pointY.z + pointX.z) / 2;
+      matrix.setPosition(randomX, randomY, randomZ);
+      instancedMesh.setMatrixAt(i, matrix);
+
+      // orientation
+      instancedMesh.getMatrixAt(i, matrix);
+      matrix.lookAt(pointX, pointY, new THREE.Object3D().up);
+      matrix.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
+          0, 0, 1, 0,
+          0, -1, 0, 0,
+          0, 0, 0, 1));
+      instancedMesh.setMatrixAt(i, matrix);
+
+      //let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]);
+      // matrix.setPosition(pos);
+      // instancedMesh.setMatrixAt(i, matrix);
+      // instancedMesh.setColorAt(i, color);
+
+      // Enable bloom layers
+      // instancedMesh.layers.enable(1);
+    }
+
+    console.error(instancedMesh)
+    instancedMesh.tick = (delta) => {
+
+    }
+
+    /*for (let i = 0; i < edge.count; i++) {
+      // color
+      edge.setColorAt(i, color.setHex(0xcf2734));
+
+      // position
+      const randomX = (pointY.x + pointX.x) / 2;
+      const randomY = (pointY.y + pointX.y) / 2;
+      const randomZ = (pointY.z + pointX.z) / 2;
+      matrix.setPosition(randomX, randomY, randomZ);
+      edge.setMatrixAt(i, matrix);
+
+      // orientation
+      edge.getMatrixAt(i, matrix);
+      matrix.lookAt(pointX, pointY, new THREE.Object3D().up);
+      matrix.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
+          0, 0, 1, 0,
+          0, -1, 0, 0,
+          0, 0, 0, 1));
+      edge.setMatrixAt(i, matrix);
+    }
+
+    instancedMesh.tick = (delta) => {
+      // animate each edge here...
+    }*/
+
+    return instancedMesh;
+  }
+
+  /*cylinderMesh(pointX, pointY, material, count) {
     let direction = new THREE.Vector3().subVectors(pointY, pointX);
     let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, direction.length(), 8, 1);
     let standardMaterial = new THREE.MeshStandardMaterial({
@@ -522,7 +616,7 @@ class ProceduralTree {
     }
 
     return edge;
-  }
+  }*/
 
   /**
    * Create tree from JSON data
