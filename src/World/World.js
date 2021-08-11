@@ -47,15 +47,15 @@ class World {
     // })
 
     // particle
-    // const particles = geometryShape.createParticles();
-    // scene.add(particles);
-    // loop.updatables.push(particles);
+    const particles = geometryShape.createParticles();
+    scene.add(particles);
+    loop.updatables.push(particles);
 
-    // const instancedShapes = geometryShape.instanceShapes();
-    // instancedShapes.forEach((shape) => {
-    //   scene.add(shape);
-    //   loop.updatables.push(shape);
-    // });
+    const instancedShapes = geometryShape.instanceShapes();
+    instancedShapes.forEach((shape) => {
+      scene.add(shape);
+      loop.updatables.push(shape);
+    });
 
     // const randomStars = geometryShape.randomStars();
     // randomStars.forEach(star =>{
@@ -63,7 +63,7 @@ class World {
     //   loop.updatables.push(star);
     // })
 
-    const groupTree = new ProceduralTree().genDraw();
+    const groupTree = new ProceduralTree().makeGroupTree();
     groupTree.forEach(tree => {
       scene.add(tree)
       loop.updatables.push(tree)
