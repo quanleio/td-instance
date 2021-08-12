@@ -47,9 +47,9 @@ class World {
     // })
 
     // particle
-    const particles = geometryShape.createParticles();
-    scene.add(particles);
-    loop.updatables.push(particles);
+    // const particles = geometryShape.createParticles();
+    // scene.add(particles);
+    // loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
     instancedShapes.forEach((shape) => {

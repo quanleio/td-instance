@@ -301,12 +301,39 @@ class ProceduralTree {
   makeGroupTree() {
     let groupTree = [];
 
-    let tree1 = this.genDraw(); tree1.position.set(-40, 0, 0);
-    let tree2 = this.genDraw(); tree2.position.set(0, 0, 0);
-    let tree3 = this.genDraw(); tree3.position.set(20, 0, 0);
-    let tree4 = this.genDraw(); tree4.position.set(40, 0, 0);
+    const randomColors = {
+      red : 0xF2003C,
+      pink: 0xff0082,
+      green: 0x0AE500,
+      purple: 0x5109ae,
+      blue: 0x003590,
+      orange: 0xc30000,
+    };
+    let colorsLength = Object.keys(randomColors).length;
+    const getRandomColor = () => {
+      var colIndx = Math.floor(Math.random()*colorsLength);
+      var colorStr = Object.keys(randomColors)[colIndx];
+      return randomColors[colorStr];
+    }
 
-    groupTree.push(tree1, tree2, tree3, tree4);
+    let tree1 = this.genDraw();
+    // tree1.position.set(-40, 0, 0);
+    // tree1.material.color = new THREE.Color().setHex(getRandomColor())
+    tree1.material.color = new THREE.Color().setHex(0xffffff * Math.random())
+
+    // let tree2 = this.genDraw();
+    // tree2.position.set(0, 0, 0);
+    // tree2.material.color = new THREE.Color().setHex(0xffffff * Math.random())
+
+    // let tree3 = this.genDraw();
+    // tree3.position.set(20, 0, 0);
+    // tree3.material.color = new THREE.Color().setHex(0xffffff * Math.random())
+
+    // let tree4 = this.genDraw();
+    // tree4.position.set(40, 0, 0);
+    // tree4.material.color = new THREE.Color().setHex(0xffffff * Math.random())
+
+    groupTree.push(tree1);
     return groupTree;
   }
 
@@ -368,16 +395,19 @@ class ProceduralTree {
       }
     }
     sentence = nextSentence;
-    console.log(sentence);
+    // console.log(sentence);
   }
   turtle() {
+
+    console.error('generate turtle')
     let angle = figureShape.angle * Math.PI / 180;
     let turtle = {
       pos: new THREE.Vector3(0, -10, 0), // position of the tree
       // Up, Left, Head, can be compared to yaw, pitch, roll
-      hlu: new THREE.Matrix3().set(0, 1, 0,
+      hlu: new THREE.Matrix3().set(
+          0, 1, 0,
           1, 0, 0,
-          0, 0, -1),
+          0, 0, -1 ),
       len: 1,
       scalar: 1,
     };
@@ -388,27 +418,13 @@ class ProceduralTree {
     let trunks = [];
 
     // Rotational matrices
-    let RuPos = new THREE.Matrix3().set(Math.cos(angle), Math.sin(angle), 0,
-        -Math.sin(angle), Math.cos(angle), 0,
-        0, 0, 1);
-    let RuNeg = new THREE.Matrix3().set(Math.cos(-angle), Math.sin(-angle), 0,
-        -Math.sin(-angle), Math.cos(-angle), 0,
-        0, 0, 1);
-    let RlPos = new THREE.Matrix3().set(Math.cos(angle), 0, -Math.sin(angle),
-        0, 1, 0,
-        Math.sin(angle), 0, Math.cos(angle));
-    let RlNeg = new THREE.Matrix3().set(Math.cos(-angle), 0, -Math.sin(-angle),
-        0, 1, 0,
-        Math.sin(-angle), 0, Math.cos(-angle));
-    let RhPos = new THREE.Matrix3().set(1, 0, 0,
-        0, Math.cos(angle), -Math.sin(angle),
-        0, Math.sin(angle), Math.cos(angle));
-    let RhNeg = new THREE.Matrix3().set(1, 0, 0,
-        0, Math.cos(-angle), -Math.sin(-angle),
-        0, Math.sin(-angle), Math.cos(-angle));
-    let Ru180 = new THREE.Matrix3().set(Math.cos(Math.PI), Math.sin(Math.PI), 0,
-        -Math.sin(Math.PI), Math.cos(Math.PI), 0,
-        0, 0, 1);
+    let RuPos = new THREE.Matrix3().set(Math.cos(angle), Math.sin(angle), 0, -Math.sin(angle), Math.cos(angle), 0, 0, 0, 1);
+    let RuNeg = new THREE.Matrix3().set(Math.cos(-angle), Math.sin(-angle), 0, -Math.sin(-angle), Math.cos(-angle), 0, 0, 0, 1);
+    let RlPos = new THREE.Matrix3().set(Math.cos(angle), 0, -Math.sin(angle), 0, 1, 0, Math.sin(angle), 0, Math.cos(angle));
+    let RlNeg = new THREE.Matrix3().set(Math.cos(-angle), 0, -Math.sin(-angle), 0, 1, 0, Math.sin(-angle), 0, Math.cos(-angle));
+    let RhPos = new THREE.Matrix3().set(1, 0, 0, 0, Math.cos(angle), -Math.sin(angle), 0, Math.sin(angle), Math.cos(angle));
+    let RhNeg = new THREE.Matrix3().set(1, 0, 0, 0, Math.cos(-angle), -Math.sin(-angle), 0, Math.sin(-angle), Math.cos(-angle));
+    let Ru180 = new THREE.Matrix3().set(Math.cos(Math.PI), Math.sin(Math.PI), 0, -Math.sin(Math.PI), Math.cos(Math.PI), 0, 0, 0, 1);
 
     for (let i = 0; i < sentence.length; i++) {
       let current = sentence.charAt(i);
@@ -491,9 +507,35 @@ class ProceduralTree {
   makeInstanceTrunk(allTrunks) {
 
     const matrix = new THREE.Matrix4();
-    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 8, 1);
+    let matrixRoot = new THREE.Matrix4();
     const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
 
+    // let direction = new THREE.Vector3().subVectors(allTrunks[0].point1, allTrunks[0].point2);
+    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.1, .2, 20, 32, 1);
+    let rootTrunk = new THREE.Mesh(rootTrunkGeo, material);
+    rootTrunk.name = 'rootTrunk';
+    rootTrunk.position.set(0, -10, 0);
+    rootTrunk.layers.enable(1)
+    /*rootTrunk.matrixAutoUpdate = false;
+
+    // set position for rootTrunk
+    console.error(allTrunks[0]);
+    let point1 = allTrunks[0].point1;
+    let point2 = allTrunks[0].point2;
+    // position
+    const randomX = (point2.x + point1.x) / 2;
+    const randomY = (point2.y + point1.y) / 2;
+    const randomZ = (point2.z + point1.z) / 2;
+    matrixRoot.setPosition(randomX, randomY, randomZ);
+    matrixRoot.lookAt(point1, point2, new THREE.Object3D().up);
+    matrixRoot.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, -1, 0, 0,
+        0, 0, 0, 1));
+    rootTrunk.updateMatrix();*/
+
+    // make other trunks
+    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 32, 1);
     let instancedMesh = new THREE.InstancedMesh(
         edgeGeometry,
         material,
@@ -503,16 +545,15 @@ class ProceduralTree {
     instancedMesh.name = "edge";
     instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
-    // let direction = new THREE.Vector3().subVectors(pointY, pointX);
-
-    for (let i = 0; i < allTrunks.length; i++) {
+    // i=0 is root
+    for (let i = 1; i < allTrunks.length; i++) {
       let inst = allTrunks[i];
       let pointX = inst.point1;
       let pointY = inst.point2;
 
       // position
       const randomX = (pointY.x + pointX.x) / 2;
-      const randomY = (pointY.y + pointX.y) / 2;
+      const randomY = (pointY.y + pointX.y) / 2 + 18;
       const randomZ = (pointY.z + pointX.z) / 2;
       matrix.setPosition(randomX, randomY, randomZ);
       instancedMesh.setMatrixAt(i, matrix);
@@ -526,65 +567,17 @@ class ProceduralTree {
           0, 0, 0, 1));
       instancedMesh.setMatrixAt(i, matrix);
 
-      //let pos = new THREE.Vector3(inst["tx"], inst["ty"], inst["tz"]);
-      // matrix.setPosition(pos);
-      // instancedMesh.setMatrixAt(i, matrix);
-      // instancedMesh.setColorAt(i, color);
-
       // Enable bloom layers
       instancedMesh.layers.enable(1);
     }
 
-    instancedMesh.tick = (delta) => {
+    rootTrunk.add(instancedMesh)
+    console.error(rootTrunk);
 
-    }
+    rootTrunk.tick = (delta) => {}
 
-    return instancedMesh;
+    return rootTrunk;
   }
-
-  /*cylinderMesh(pointX, pointY, material, count) {
-    let direction = new THREE.Vector3().subVectors(pointY, pointX);
-    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, direction.length(), 8, 1);
-    let standardMaterial = new THREE.MeshStandardMaterial({
-      roughness: 0.4,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 1
-    });
-    const matrix = new THREE.Matrix4();
-    const color = new THREE.Color();
-
-    let edge = new THREE.InstancedMesh(edgeGeometry, standardMaterial, count);
-    edge.type = "InstancedMesh";
-    edge.name = "edge";
-    edge.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-    for (let i = 0; i < edge.count; i++) {
-      // color
-      edge.setColorAt(i, color.setHex(0xcf2734));
-
-      // position
-      const randomX = (pointY.x + pointX.x) / 2;
-      const randomY = (pointY.y + pointX.y) / 2;
-      const randomZ = (pointY.z + pointX.z) / 2;
-      matrix.setPosition(randomX, randomY, randomZ);
-      edge.setMatrixAt(i, matrix);
-
-      // orientation
-      edge.getMatrixAt(i, matrix);
-      matrix.lookAt(pointX, pointY, new THREE.Object3D().up);
-      matrix.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
-          0, 0, 1, 0,
-          0, -1, 0, 0,
-          0, 0, 0, 1));
-      edge.setMatrixAt(i, matrix);
-    }
-
-    edge.tick = (delta) => {
-      // animate each edge here...
-    }
-
-    return edge;
-  }*/
 
   /**
    * Create tree from JSON data
