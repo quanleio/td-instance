@@ -48,9 +48,9 @@ class World {
     // })
 
     // particle
-    const particles = geometryShape.createParticles();
-    scene.add(particles);
-    loop.updatables.push(particles);
+    // const particles = geometryShape.createParticles();
+    // scene.add(particles);
+    // loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
     instancedShapes.forEach((shape) => {
@@ -64,11 +64,19 @@ class World {
     //   loop.updatables.push(star);
     // })
 
-    const groupTree = new LindenmayerTree().makeGroupTree();
-    groupTree.forEach(tree => {
-      scene.add(tree)
-      loop.updatables.push(tree)
+    // Get data
+    axios.get("http://3.36.99.191/vz/first-data").then(data =>{
+
+      // make trees based on Turtle rules
+      const groupTree = new LindenmayerTree().makeGroupTree(data);
+      groupTree.forEach(tree => {
+        scene.add(tree)
+        loop.updatables.push(tree)
+      })
     })
+    .catch(e => {
+      console.error(e);
+    });
 
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
@@ -162,6 +170,7 @@ class World {
     // resize
     new Resizer(camera, renderer , composer);
   }
+
 
   render() {
     renderer.render(scene, camera); // draw a single frame

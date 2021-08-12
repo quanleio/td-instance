@@ -1,30 +1,28 @@
 
-// let rules = [];
-// let figureShape = {
-//   Structure: 1,
-//   prev: 0,
-//   angle: 22, // Angle in degrees, gets converted into radiance in turtle during rendering
-//   'n (Iterations)': 4, // Number of iterations when generating sentence
-//   Axiom: 'F',
-// };
-// let sentence = figureShape.Axiom;
+const clock = new THREE.Clock();
 
 class LindenmayerTree {
 
   constructor() {
     this.figureShape = {
       Structure: 1,
-      prev: 0,
-      angle: 22, // Angle in degrees, gets converted into radiance in turtle during rendering
-      'n (Iterations)': 4, // Number of iterations when generating sentence
+      // prev: 0,
+      angle: 10, // Angle in degrees, gets converted into radiance in turtle during rendering, default=22
+      'n (Iterations)': 4, // minimum number of iterations when generating sentence
       Axiom: 'F',
     };
     this.sentence = this.figureShape.Axiom;
     this.rules = [];
   }
 
-  makeGroupTree() {
+  /**
+   * Make 4 groups of tree with different colors.
+   * @returns {*[]}
+   */
+  makeGroupTree(data) {
     let groupTree = [];
+    let danTotal = data.data.danTotal;
+    console.error('make Group tree:' , data);
 
     const randomColors = {
       red : 0xF2003C,
@@ -42,53 +40,145 @@ class LindenmayerTree {
     }
 
     // tree1.material.color = new THREE.Color().setHex(getRandomColor())
-    let tree1 = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()));
-    tree1.position.set(-50, -20, 0);
+    let treeA = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.a);
+    treeA.position.set(-50, -20, 0);
 
-    let tree2 = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()));
-    tree2.position.set(-20, -20, 0);
+    let treeB = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.b);
+    treeB.position.set(-20, -20, 0);
 
-    let tree3 = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()));
-    tree3.position.set(10, -20, 0);
+    let treeC = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.c);
+    treeC.position.set(10, -20, 0);
 
-    let tree4 = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()));
-    tree4.position.set(40, -20, 0);
+    let treeD = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.d);
+    treeD.position.set(40, -20, 0);
 
-    groupTree.push(tree1, tree2, tree3, tree4);
+    groupTree.push(treeA, treeB, treeC, treeD);
     return groupTree;
   }
 
-  genDraw() {
-    this.rulechange();
+  /**
+   * Recalculate the iteration, min:4, max:7
+   * @param dan
+   * @returns {number}
+   */
+  estimateDan(dan){
+    const min = 4;
+    let estimate;
 
-    this.sentence = this.figureShape.Axiom;
-    let interation = this.figureShape["n (Iterations)"];
+    dan = Math.round(dan/100);
+    console.error('dan: ', dan)
 
-    for (let i = 0; i < interation ; i++) {
-      this.generate();
+    if (dan <= 3) {
+      estimate = min;
+    }
+    else if (dan >= 7) {
+      estimate = 7;
+    }
+    else {
+      estimate = dan;
     }
 
-    return this.turtle()
+    console.error('estimate: ', estimate)
+    return estimate;
   }
+
+  /**
+   * Generator tree with {color}
+   * Create 1 root for 10 branches.
+   * @param color
+   * @returns {*}
+   */
+  generateTree(color, dan) {
+
+    this.figureShape["n (Iterations)"] = this.estimateDan(dan);
+
+    // let direction = new THREE.Vector3().subVectors(allTrunks[0].point1, allTrunks[0].point2);
+    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.1, .4, 20, 32, 1);
+    const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4,metalness: 0.1 });
+    let rootTrunk = new THREE.Mesh(rootTrunkGeo, material);
+    rootTrunk.name = 'rootTrunk';
+    rootTrunk.position.set(0, -10, 0); // fix position of root
+    rootTrunk.layers.enable(1);
+
+    // make other branches
+    // make 10 trunks for 1 root
+    for (let i=0; i< 10; i++) {
+      let allTrunks = this.genDraw();
+      const trunk = this.makeInstanceTrunk(allTrunks, material);
+
+      // add other trunks into root
+      rootTrunk.add(trunk)
+    }
+
+    /*let allTrunks = this.genDraw();
+    const trunk = this.makeInstanceTrunk(allTrunks, material);*/
+
+    // console.error(rootTrunk)
+
+    rootTrunk.tick = () => {
+      // let lastSystemTime = systemTime;
+      // time += delta;
+      // let seasonRad = ((time / (dayLength * daysPerYear)) % 2) * Math.PI;
+      const t = clock.getElapsedTime()
+
+      // rootTrunk.scale.x = THREE.MathUtils.lerp( rootTrunk.scale.x,(-2 + Math.sin(t)) * 5, 0.1 );
+      // rootTrunk.scale.y = THREE.MathUtils.lerp( rootTrunk.scale.y,(-2 + Math.sin(t)) * 5, 0.1 );
+      // rootTrunk.scale.z = THREE.MathUtils.lerp( rootTrunk.scale.z,(-2 + Math.sin(t)) * 5, 0.1 );
+
+      /*var growthRate = Math.sin(Math.PI / 8 + t) * 0.8 + 0.1;
+      if (growthRate > 0) growth = growth + (t / 1000) * growthRate;
+
+      // var growthFactor = undefined;
+      // (growth < 60) ? growthFactor = Math.log(growth / 12 + 1) / (level * 1.2 + 1): growthFactor = Math.log(60 / 12 + 1) / (level * 1.2 + 1);
+      let growthFactor = Math.log(60 / 12 + 1) / (level * 1.2 + 1);
+
+      rootTrunk.scale.set(
+          growthFactor * widthFactor,
+          growthFactor * lengthFactor,
+          growthFactor * widthFactor
+      );*/
+
+      // if (rootTrunk.scale.x < 5) {
+      //   rootTrunk.scale.set(
+      //       .025 + (t/3.0),
+      //       .025 + (t/3.0),
+      //       .025 + (t/3.0)
+      //   );
+      // }
+
+    }
+
+    return rootTrunk;
+  }
+
+  /**
+   * Check if rules are changed.
+   */
   rulechange() {
 
     this.rules = [];
 
-    if (this.figureShape.Structure === 1) {
-      this.figureShape.angle = 22; // Conversion from degrees to radians
-      this.figureShape['n (Iterations)'] = 4; // Number of iterations when generating sentence
-      this.figureShape.Axiom = 'F';
+    // if (this.figureShape.Structure === 1) {
+    //   console.error('update iteration: ', this.figureShape['n (Iterations)'])
+    //   this.figureShape.angle = 22; // Conversion from degrees to radians
+    //   this.figureShape['n (Iterations)'] = 4; // Number of iterations when generating sentence
+    // this.figureShape.Axiom = 'F';
 
-      this.rules[0] = {
-        a: 'F',
-        b: 'F´[+F´]F´[-F´]/F´',
-        c: 'F´[+F´]^F´',
-        d: 'F´+F´/F´',
-        bpro: 33,
-        cpro: 33,
-      };
-    }
+    this.rules[0] = {
+      a: 'F',
+      b: 'F´[+F´]F´[-F´]/F´',
+      c: 'F´[+F´]^F´',
+      d: 'F´+F´/F´',
+      bpro: 33,
+      cpro: 33,
+    };
+    // }
   }
+
+
+  /**
+   * Generate sentences based on turtle operators.
+   */
   generate() {
     let nextSentence = '';
     for (let i = 0; i < this.sentence.length; i++) {
@@ -104,9 +194,9 @@ class LindenmayerTree {
           else if (rand < this.rules[j].bpro + this.rules[j].cpro) {
             nextSentence += this.rules[j].c;
           }
-          else {
-            nextSentence += this.rules[j].d;
-          }
+          // else {
+          //   nextSentence += this.rules[j].d;
+          // }
           break;
         }
       }
@@ -117,6 +207,29 @@ class LindenmayerTree {
     this.sentence = nextSentence;
     // console.log(sentence);
   }
+
+  /**
+   * Generate turtle rules.
+   * @returns {*[]}
+   */
+  genDraw() {
+    this.rulechange();
+
+    this.sentence = this.figureShape.Axiom;
+    let interation = this.figureShape["n (Iterations)"];
+    console.error('===> final interation: ', interation)
+
+    for (let i = 0; i < interation ; i++) {
+      this.generate();
+    }
+
+    return this.turtle()
+  }
+
+  /**
+   * Make trunks based on turtle operators.
+   * @returns {*[]}
+   */
   turtle() {
     let angle = this.figureShape.angle * Math.PI / 180;
     let turtle = {
@@ -197,7 +310,7 @@ class LindenmayerTree {
         turtleHistory.pop();
         turtle = turtleHistory[turtleHistory.length - 1];
       }
-          // Rotate the turtle to vertical.
+      // Rotate the turtle to vertical.
       // Inte testad än
       else if (current === '$') {
         // L = (V x H) / |V x H|
@@ -224,46 +337,28 @@ class LindenmayerTree {
     return trunks;
   }
 
-  generateTree(color) {
-
-    console.error('generateTree');
-
-    // let direction = new THREE.Vector3().subVectors(allTrunks[0].point1, allTrunks[0].point2);
-    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.1, .4, 20, 32, 1);
-    const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4,metalness: 0.1 });
-    let rootTrunk = new THREE.Mesh(rootTrunkGeo, material);
-    rootTrunk.name = 'rootTrunk';
-    rootTrunk.position.set(0, -10, 0); // fix position of root
-    rootTrunk.layers.enable(1);
-
-    // make other branches
-    // make 10 trunks for 1 root
-    for (let i=0; i< 10; i++) {
-      let allTrunks = this.genDraw();
-      const trunk = this.makeInstanceTrunk(allTrunks, material);
-
-      // add other trunks into root
-      rootTrunk.add(trunk)
-    }
-
-    console.error(rootTrunk)
-
-    rootTrunk.tick = (delta) => {}
-
-    return rootTrunk;
-  }
-
+  /**
+   * Make branches.
+   * @param allTrunks
+   * @param mat
+   * @returns {InstancedMesh|InstancedMesh}
+   */
   makeInstanceTrunk(allTrunks, mat) {
 
-    console.error('make other trunks')
+    // console.warn(allTrunks)
 
     const matrix = new THREE.Matrix4();
-    let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 32, 1);
+    let dummy = new THREE.Object3D();
+    const radiansPerSecond = THREE.MathUtils.degToRad(30);
+    const sizes = [];
+
+    let edgeGeometry = new THREE.CylinderBufferGeometry(0.06, 0.06, 1, 32, 1); // same geo
     let instancedMesh = new THREE.InstancedMesh(
         edgeGeometry,
         mat,
-        allTrunks.length
+        allTrunks.length // how many instances
     );
+
     instancedMesh.type = "InstancedTree";
     instancedMesh.name = "branch";
     instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
@@ -280,6 +375,7 @@ class LindenmayerTree {
       const randomZ = (pointY.z + pointX.z) / 2;
       matrix.setPosition(randomX, randomY, randomZ);
       instancedMesh.setMatrixAt(i, matrix);
+      // sizes.push(20);
 
       // orientation
       instancedMesh.getMatrixAt(i, matrix);
@@ -294,9 +390,49 @@ class LindenmayerTree {
       instancedMesh.layers.enable(1);
     }
 
+    // edgeGeometry.setAttribute(
+    //     "size",
+    //     new THREE.Float32BufferAttribute(sizes, 1).setUsage( THREE.DynamicDrawUsage )
+    // );
+
+    instancedMesh.tick = (delta) => {
+      const t = clock.getElapsedTime()
+
+      for (let i = 1; i < instancedMesh.count; i++) {
+        // rotation
+        instancedMesh.getMatrixAt(i, matrix);
+        matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+
+        if (dummy.scale.x < 2) {
+          dummy.scale.x += radiansPerSecond * delta;
+          dummy.scale.y += radiansPerSecond * delta;
+          dummy.scale.z += radiansPerSecond * delta;
+
+          dummy.updateMatrix();
+          instancedMesh.setMatrixAt(i, dummy.matrix);
+        }
+      }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+
+      // const time = Date.now() * 0.002;
+      // const sizes = edgeGeometry.attributes.size.array;
+      // for (let i = 0; i < instancedMesh.count; i++) {
+      //   sizes[i] = 0.01 * (1 + Math.sin(0.1 * i + delta));
+      // }
+      // edgeGeometry.attributes.size.needsUpdate = true;
+    }
+
     return instancedMesh;
   }
 
+}
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.round(Math.random() * (max - min) + min);
 }
 
 export { LindenmayerTree };
