@@ -4,6 +4,7 @@ import { loadSakura, loadSuzanne } from "./components/model.js";
 import { createDirLight, createHemiLight } from "./components/lights.js";
 import { Geometries } from "./components/Geometries.js";
 import { ProceduralTree } from "./components/ProceduralTree.js";
+import { LindenmayerTree } from './components/LindenmayerTree.js';
 import { createRenderer } from "./systems/renderer.js";
 import { createControl } from "./systems/controls.js";
 import { Loop } from "./systems/Loop.js";
@@ -47,9 +48,9 @@ class World {
     // })
 
     // particle
-    // const particles = geometryShape.createParticles();
-    // scene.add(particles);
-    // loop.updatables.push(particles);
+    const particles = geometryShape.createParticles();
+    scene.add(particles);
+    loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
     instancedShapes.forEach((shape) => {
@@ -63,7 +64,7 @@ class World {
     //   loop.updatables.push(star);
     // })
 
-    const groupTree = new ProceduralTree().makeGroupTree();
+    const groupTree = new LindenmayerTree().makeGroupTree();
     groupTree.forEach(tree => {
       scene.add(tree)
       loop.updatables.push(tree)
