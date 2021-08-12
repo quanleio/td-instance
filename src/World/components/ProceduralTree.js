@@ -316,10 +316,12 @@ class ProceduralTree {
       return randomColors[colorStr];
     }
 
-    let tree1 = this.genDraw();
+    let tree1 = this.generateTree(getRandomColor());
+
+    // let tree1 = this.genDraw();
     // tree1.position.set(-40, 0, 0);
     // tree1.material.color = new THREE.Color().setHex(getRandomColor())
-    tree1.material.color = new THREE.Color().setHex(0xffffff * Math.random())
+    // tree1.material.color = new THREE.Color().setHex(0xffffff * Math.random())
 
     // let tree2 = this.genDraw();
     // tree2.position.set(0, 0, 0);
@@ -349,7 +351,6 @@ class ProceduralTree {
 
     return this.turtle()
   }
-
   rulechange() {
 
     rules = [];
@@ -398,8 +399,6 @@ class ProceduralTree {
     // console.log(sentence);
   }
   turtle() {
-
-    console.error('generate turtle')
     let angle = figureShape.angle * Math.PI / 180;
     let turtle = {
       pos: new THREE.Vector3(0, -10, 0), // position of the tree
@@ -502,47 +501,54 @@ class ProceduralTree {
       }
     }
 
-    return this.makeInstanceTrunk(trunks);
-  }
-  makeInstanceTrunk(allTrunks) {
+    // return this.makeRootTrunk(trunks);
+    // return this.makeInstanceTrunk(trunks);
 
-    const matrix = new THREE.Matrix4();
-    let matrixRoot = new THREE.Matrix4();
-    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xec173a).convertSRGBToLinear(), roughness: 0.4,metalness: 0.1 });
+    return trunks;
+  }
+
+  generateTree(color) {
+
+    console.error('generateTree');
 
     // let direction = new THREE.Vector3().subVectors(allTrunks[0].point1, allTrunks[0].point2);
-    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.1, .2, 20, 32, 1);
+    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.1, .4, 20, 32, 1);
+    const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4,metalness: 0.1 });
     let rootTrunk = new THREE.Mesh(rootTrunkGeo, material);
     rootTrunk.name = 'rootTrunk';
-    rootTrunk.position.set(0, -10, 0);
-    rootTrunk.layers.enable(1)
-    /*rootTrunk.matrixAutoUpdate = false;
+    rootTrunk.position.set(0, -10, 0); // fix position of root
+    rootTrunk.layers.enable(1);
 
-    // set position for rootTrunk
-    console.error(allTrunks[0]);
-    let point1 = allTrunks[0].point1;
-    let point2 = allTrunks[0].point2;
-    // position
-    const randomX = (point2.x + point1.x) / 2;
-    const randomY = (point2.y + point1.y) / 2;
-    const randomZ = (point2.z + point1.z) / 2;
-    matrixRoot.setPosition(randomX, randomY, randomZ);
-    matrixRoot.lookAt(point1, point2, new THREE.Object3D().up);
-    matrixRoot.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
-        0, 0, 1, 0,
-        0, -1, 0, 0,
-        0, 0, 0, 1));
-    rootTrunk.updateMatrix();*/
+    // make other branches
+    // make 10 trunks for 1 root
+    for (let i=0; i< 10; i++) {
+      let allTrunks = this.genDraw();
+      const trunk = this.makeInstanceTrunk(allTrunks, material);
 
-    // make other trunks
+      // add other trunks into root
+      rootTrunk.add(trunk)
+    }
+
+    console.error(rootTrunk)
+
+    rootTrunk.tick = (delta) => {}
+
+    return rootTrunk;
+  }
+
+  makeInstanceTrunk(allTrunks, mat) {
+
+    console.error('make other trunks')
+
+    const matrix = new THREE.Matrix4();
     let edgeGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 32, 1);
     let instancedMesh = new THREE.InstancedMesh(
         edgeGeometry,
-        material,
+        mat,
         allTrunks.length
     );
     instancedMesh.type = "InstancedTree";
-    instancedMesh.name = "edge";
+    instancedMesh.name = "branch";
     instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
     // i=0 is root
@@ -571,12 +577,7 @@ class ProceduralTree {
       instancedMesh.layers.enable(1);
     }
 
-    rootTrunk.add(instancedMesh)
-    console.error(rootTrunk);
-
-    rootTrunk.tick = (delta) => {}
-
-    return rootTrunk;
+    return instancedMesh;
   }
 
   /**
