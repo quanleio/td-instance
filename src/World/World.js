@@ -1,6 +1,6 @@
 import { createCamera } from "./components/camera.js";
 import { createScene } from "./components/scene.js";
-import { loadSakura, loadSuzanne } from "./components/model.js";
+import { loadSakura, loadSuzanne, loadRobot } from "./components/model.js";
 import { createDirLight, createHemiLight } from "./components/lights.js";
 import { Geometries } from "./components/Geometries.js";
 import { ProceduralTree } from "./components/ProceduralTree.js";
@@ -48,15 +48,15 @@ class World {
     // })
 
     // particle
-    const particles = geometryShape.createParticles();
-    scene.add(particles);
-    loop.updatables.push(particles);
+    // const particles = geometryShape.createParticles();
+    // scene.add(particles);
+    // loop.updatables.push(particles);
 
-    const instancedShapes = geometryShape.instanceShapes();
-    instancedShapes.forEach((shape) => {
-      scene.add(shape);
-      loop.updatables.push(shape);
-    });
+    // const instancedShapes = geometryShape.instanceShapes();
+    // instancedShapes.forEach((shape) => {
+    //   scene.add(shape);
+    //   loop.updatables.push(shape);
+    // });
 
     // const randomStars = geometryShape.randomStars();
     // randomStars.forEach(star =>{
@@ -65,19 +65,19 @@ class World {
     // })
 
     // Get data
-    // axios.get("http://3.36.99.191/vz/first-data").then(data =>{
-    //
-    //   // make trees based on Turtle rules
-    //   const groupTree = new LindenmayerTree().makeGroupTree(data);
-    //   groupTree.forEach(tree => {
-    //     scene.add(tree);
-    //     tree.children.forEach( t => loop.updatables.push(t))
-    //     // loop.updatables.push(tree)
-    //   })
-    // })
-    // .catch(e => {
-    //   console.error(e);
-    // });
+    axios.get("http://3.36.99.191/vz/first-data").then(data =>{
+
+      // make trees based on Turtle rules
+      const groupTree = new LindenmayerTree().makeGroupTree(data);
+      groupTree.forEach(tree => {
+        scene.add(tree);
+        tree.children.forEach( t => loop.updatables.push(t))
+        // loop.updatables.push(tree)
+      })
+    })
+    .catch(e => {
+      console.error(e);
+    });
 
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
@@ -132,14 +132,20 @@ class World {
     }, 1000)*/
 
     // Suzanne model
-    loadSuzanne().then(_model => {
-      scene.add(_model);
-      loop.updatables.push(_model);
-    });
+    // loadSuzanne().then(_model => {
+    //   scene.add(_model);
+    //   loop.updatables.push(_model);
+    // });
 
     // Sakura model
     // loadSakura().then(_model => {
     //   scene.add(_model);
+    // })
+
+    // Robot
+    // loadRobot().then(robot => {
+    //   console.warn(robot)
+    //   scene.add(robot);
     // })
 
     console.error(scene);

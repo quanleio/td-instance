@@ -1,23 +1,23 @@
-
-
 const randomColors = {
-  green: 0x5FBB88,      // 1
-  red : 0x771B56,       // 2
-  pink: 0xF9E5F6,       // 3
-  brown: 0x8E5032,      // 4
-  lightblue: 0x57AED7,  // 5
-  blue: 0x436FB3,       // 6
-  yellow: 0xE0BA4A,     // 7
-  white: 0xffffff       // 8
+  green: 0x5fbb88, // 1
+  red: 0x771b56, // 2
+  pink: 0xf9e5f6, // 3
+  brown: 0x8e5032, // 4
+  lightblue: 0x57aed7, // 5
+  blue: 0x436fb3, // 6
+  yellow: 0xe0ba4a, // 7
+  white: 0xffffff, // 8
 };
 let colorsLength = Object.keys(randomColors).length;
+
 function getRandomColor() {
-  var colIndx = Math.floor(Math.random()*colorsLength);
+  var colIndx = Math.floor(Math.random() * colorsLength);
   var colorStr = Object.keys(randomColors)[colIndx];
   return randomColors[colorStr];
 }
-const radiansPerSecond = THREE.MathUtils.degToRad(30);
 
+const radiansPerSecond = THREE.MathUtils.degToRad(30);
+const texture = new THREE.TextureLoader().load('assets/circle.png');
 function vertexShader() {
   return `
     precision highp float;
@@ -48,7 +48,7 @@ function vertexShader() {
         gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
   
       }
-  `
+  `;
 }
 function fragmentShader() {
   return `
@@ -67,17 +67,66 @@ function fragmentShader() {
         gl_FragColor = color;
   
       }
-  `
+  `;
+}
+const clock = new THREE.Clock();
+const dummy = new THREE.Object3D();
+const matrix = new THREE.Matrix4();
+
+function loadRobot() {
+  return new Promise(resolve => {
+    let gltfLoader = new THREE.GLTFLoader();
+    const count = 1000;
+
+    gltfLoader.load( 'assets/Flower.glb' , function(gltf) {
+
+      const _stemMesh = gltf.scene.getObjectByName( 'Stem' );
+      const _blossomMesh = gltf.scene.getObjectByName( 'Blossom' );
+
+      const stemGeometry = _stemMesh.geometry.clone();
+      const blossomGeometry = _blossomMesh.geometry.clone();
+
+      const defaultTransform = new THREE.Matrix4()
+      .makeRotationX( Math.PI )
+      .multiply( new THREE.Matrix4().makeScale( 7, 7, 7 ) );
+
+      stemGeometry.applyMatrix4( defaultTransform );
+      blossomGeometry.applyMatrix4( defaultTransform );
+
+      const stemMaterial = _stemMesh.material;
+      const blossomMaterial = _blossomMesh.material;
+
+      const stemMesh = new THREE.InstancedMesh( stemGeometry, stemMaterial, count );
+      const blossomMesh = new THREE.InstancedMesh( blossomGeometry, blossomMaterial, count );
+
+      // Assign random colors to the blossoms.
+      const color = new THREE.Color();
+      const blossomPalette = [ 0xF20587, 0xF2D479, 0xF2C879, 0xF2B077, 0xF24405 ];
+
+      for ( let i = 0; i < count; i ++ ) {
+
+        color.setHex( blossomPalette[ Math.floor( Math.random() * blossomPalette.length ) ] );
+        blossomMesh.setColorAt( i, color );
+
+      }
+
+      // Instance matrices will be updated every frame.
+      stemMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
+      blossomMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
+
+      // resolve(gltf.scene);
+      resolve(stemMesh)
+
+    });
+  })
 }
 
-const clock = new THREE.Clock();
 
 /**
  * Load BufferGeometry to make mesh.
  * @returns {Promise<unknown>}
  */
 function loadSuzanne() {
-
   return new Promise((resolve, reject) => {
     new THREE.BufferGeometryLoader().load(
       "assets/suzanne_buffergeometry.json",
@@ -85,15 +134,13 @@ function loadSuzanne() {
         buffGeo.computeVertexNormals();
 
         makeInstance(buffGeo).then((_instancedMesh) => {
-
           // this method will be called once per frame
           _instancedMesh.tick = (delta) => {
-
             var time = clock.getElapsedTime(); // elapsed time since last reset
-            if ( time > 1.5) {
+            if (time > 1.5) {
               for (let index = 0; index < _instancedMesh.count; index++) {
-
-                _instancedMesh.setColorAt(index , new THREE.Color().setHex(getRandomColor()));
+                _instancedMesh.setColorAt( index, new THREE.Color().setHex(getRandomColor())
+                );
                 _instancedMesh.instanceColor.needsUpdate = true;
               }
               clock.start(); // resets clock
@@ -135,8 +182,7 @@ function loadSakura() {
  * @returns {Promise<unknown>}
  */
 function makeInstance(_buffGeo) {
-
-  const vertex = vertexShader();
+ /* const vertex = vertexShader();
   const fragment = fragmentShader();
   const shaderMaterial = new THREE.RawShaderMaterial({
     uniforms: {
@@ -147,7 +193,7 @@ function makeInstance(_buffGeo) {
     fragmentShader: fragment,
     side: THREE.DoubleSide,
     transparent: true,
-  });
+  });*/
 
   return new Promise((resolve, reject) => {
     const matrix = new THREE.Matrix4();
@@ -158,6 +204,15 @@ function makeInstance(_buffGeo) {
         let instancedCount = instanceData.length;
         console.error("instancedCount: ", instancedCount);
 
+        // const material = new THREE.MeshBasicMaterial({
+        //   color: 0xBA0A1B,
+        //   map: texture,
+        //   transparent: true,
+        //   opacity: 1,
+        //   depthTest: false,
+        //   depthWrite: false,
+        //   blending: THREE.AdditiveBlending
+        // });
         const material = new THREE.MeshPhongMaterial();
         let instancedMesh = new THREE.InstancedMesh(
           _buffGeo,
@@ -178,11 +233,11 @@ function makeInstance(_buffGeo) {
         }
 
         /*instancedMesh.tick = (delta) => {
-          const time = performance.now();
+            const time = performance.now();
 
-          // instancedMesh.material.uniforms["time"].value = time * 0.005;
-          // mesh.material.uniforms[ "sineTime" ].value = Math.sin( mesh.material.uniforms[ "time" ].value * 0.05 );
-        };*/
+            // instancedMesh.material.uniforms["time"].value = time * 0.005;
+            // mesh.material.uniforms[ "sineTime" ].value = Math.sin( mesh.material.uniforms[ "time" ].value * 0.05 );
+          };*/
 
         resolve(instancedMesh);
       });
@@ -277,4 +332,4 @@ function onError(e) {
   console.error(e);
 }
 
-export { loadSuzanne, loadSakura };
+export { loadSuzanne, loadSakura, loadRobot };
