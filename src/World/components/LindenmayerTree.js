@@ -41,16 +41,20 @@ class LindenmayerTree {
 
     // tree1.material.color = new THREE.Color().setHex(getRandomColor())
     let treeA = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.a);
-    treeA.position.set(-50, -20, 0);
+    treeA.position.set(0, -10, 0);
+    treeA.rotation.y = Math.random() * Math.PI/180;
 
     let treeB = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.b);
-    treeB.position.set(-20, -20, 0);
+    treeB.position.set(-1, -10, 0);
+    treeB.rotation.y = Math.random() * 2 * Math.PI;
 
     let treeC = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.c);
-    treeC.position.set(10, -20, 0);
+    treeC.position.set(1, -10, 1);
+    treeC.rotation.y = Math.random() * 2 * Math.PI;
 
     let treeD = this.generateTree(new THREE.Color().setHex(0xffffff * Math.random()), danTotal.d);
-    treeD.position.set(40, -20, 0);
+    treeD.position.set(1, -10, -1);
+    treeD.rotation.y = Math.random() * 2 * Math.PI;
 
     groupTree.push(treeA, treeB, treeC, treeD);
     return groupTree;
@@ -68,7 +72,7 @@ class LindenmayerTree {
     dan = Math.round(dan/100);
     console.error('dan: ', dan)
 
-    if (dan <= 3) {
+    if (dan <= 4) {
       estimate = min;
     }
     else if (dan >= 7) {
@@ -91,9 +95,10 @@ class LindenmayerTree {
   generateTree(color, dan) {
 
     this.figureShape["n (Iterations)"] = this.estimateDan(dan);
+    let branches = [];
 
     // let direction = new THREE.Vector3().subVectors(allTrunks[0].point1, allTrunks[0].point2);
-    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.1, .4, 20, 32, 1);
+    let rootTrunkGeo = new THREE.CylinderBufferGeometry(.2, .2, 20, 32, 1);
     const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4,metalness: 0.1 });
     let rootTrunk = new THREE.Mesh(rootTrunkGeo, material);
     rootTrunk.name = 'rootTrunk';
@@ -105,6 +110,7 @@ class LindenmayerTree {
     for (let i=0; i< 10; i++) {
       let allTrunks = this.genDraw();
       const trunk = this.makeInstanceTrunk(allTrunks, material);
+      branches.push(trunk);
 
       // add other trunks into root
       rootTrunk.add(trunk)
@@ -114,39 +120,19 @@ class LindenmayerTree {
     const trunk = this.makeInstanceTrunk(allTrunks, material);*/
 
     // console.error(rootTrunk)
+    // rootTrunk.children.forEach(branch => branch.position.y = branch.position.y + 10)
 
-    rootTrunk.tick = () => {
-      // let lastSystemTime = systemTime;
-      // time += delta;
-      // let seasonRad = ((time / (dayLength * daysPerYear)) % 2) * Math.PI;
-      const t = clock.getElapsedTime()
-
-      // rootTrunk.scale.x = THREE.MathUtils.lerp( rootTrunk.scale.x,(-2 + Math.sin(t)) * 5, 0.1 );
-      // rootTrunk.scale.y = THREE.MathUtils.lerp( rootTrunk.scale.y,(-2 + Math.sin(t)) * 5, 0.1 );
-      // rootTrunk.scale.z = THREE.MathUtils.lerp( rootTrunk.scale.z,(-2 + Math.sin(t)) * 5, 0.1 );
-
-      /*var growthRate = Math.sin(Math.PI / 8 + t) * 0.8 + 0.1;
-      if (growthRate > 0) growth = growth + (t / 1000) * growthRate;
-
-      // var growthFactor = undefined;
-      // (growth < 60) ? growthFactor = Math.log(growth / 12 + 1) / (level * 1.2 + 1): growthFactor = Math.log(60 / 12 + 1) / (level * 1.2 + 1);
-      let growthFactor = Math.log(60 / 12 + 1) / (level * 1.2 + 1);
-
-      rootTrunk.scale.set(
-          growthFactor * widthFactor,
-          growthFactor * lengthFactor,
-          growthFactor * widthFactor
-      );*/
-
-      // if (rootTrunk.scale.x < 5) {
-      //   rootTrunk.scale.set(
-      //       .025 + (t/3.0),
-      //       .025 + (t/3.0),
-      //       .025 + (t/3.0)
-      //   );
-      // }
-
-    }
+    // rootTrunk.tick = () => {
+      // const t = clock.getElapsedTime();
+      // rootTrunk.children.forEach(branch => {
+      //   if(branch.scale.x <= 1 ) {
+      //     branch.position.y += t * .0008;
+      //     branch.scale.x += t * .0001;
+      //     branch.scale.y += t * .0001;
+      //     branch.scale.z += t * .0001;
+      //   }
+      // })
+    // }
 
     return rootTrunk;
   }
@@ -174,7 +160,6 @@ class LindenmayerTree {
     };
     // }
   }
-
 
   /**
    * Generate sentences based on turtle operators.
@@ -358,10 +343,11 @@ class LindenmayerTree {
         mat,
         allTrunks.length // how many instances
     );
-
     instancedMesh.type = "InstancedTree";
     instancedMesh.name = "branch";
     instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+    instancedMesh.scale.setScalar(.01)
+    instancedMesh.position.y = 10
 
     // i=0 is root
     for (let i = 1; i < allTrunks.length; i++) {
@@ -371,11 +357,11 @@ class LindenmayerTree {
 
       // position
       const randomX = (pointY.x + pointX.x) / 2;
-      const randomY = (pointY.y + pointX.y) / 2 + 18;
+      const randomY = (pointY.y + pointX.y) / 2;
       const randomZ = (pointY.z + pointX.z) / 2;
       matrix.setPosition(randomX, randomY, randomZ);
       instancedMesh.setMatrixAt(i, matrix);
-      // sizes.push(20);
+      sizes.push(20);
 
       // orientation
       instancedMesh.getMatrixAt(i, matrix);
@@ -386,35 +372,64 @@ class LindenmayerTree {
           0, 0, 0, 1));
       instancedMesh.setMatrixAt(i, matrix);
 
+      // scale
+      /*instancedMesh.getMatrixAt(i, matrix);
+      matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+      dummy.scale.x = dummy.scale.y = dummy.scale.z = .01;
+      dummy.updateMatrix();
+      instancedMesh.setMatrixAt(i, dummy.matrix);*/
+
       // Enable bloom layers
       instancedMesh.layers.enable(1);
     }
 
-    // edgeGeometry.setAttribute(
-    //     "size",
-    //     new THREE.Float32BufferAttribute(sizes, 1).setUsage( THREE.DynamicDrawUsage )
-    // );
+    setInterval(() => {
+      // for (let i = 1; i < instancedMesh.count; i++) {
+      //   // rotation
+      //   instancedMesh.getMatrixAt(i, matrix);
+      //   matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+      //
+      //   if (dummy.scale.x < 2) {
+      //     dummy.position.y += t * .0008;
+      //     dummy.scale.x += t * .0001;
+      //     dummy.scale.y += t * .0001;
+      //     dummy.scale.z += t * .0001;
+      //
+      //     dummy.updateMatrix();
+      //     instancedMesh.setMatrixAt(i, dummy.matrix);
+      //   }
+      // }
+      // instancedMesh.instanceMatrix.needsUpdate = true;
+
+    }, 500)
 
     instancedMesh.tick = (delta) => {
-      const t = clock.getElapsedTime()
+      const time = clock.getElapsedTime();
+      // const time = Date.now() * 0.002;
 
-      for (let i = 1; i < instancedMesh.count; i++) {
+      if (instancedMesh.scale.x < 1.2) {
+        instancedMesh.position.y += 0.008 * (1 + Math.sin(0.1 + time)); //time * .008;
+        instancedMesh.scale.x += 0.001 * (1 + Math.sin(0.1 + time)); //time * .001;
+        instancedMesh.scale.y += 0.001 * (1 + Math.sin(0.1 + time)); //time * .001;
+        instancedMesh.scale.z += 0.001 * (1 + Math.sin(0.1 + time)); //time * .001;
+      }
+      /*for (let i = 1; i < instancedMesh.count; i++) {
         // rotation
         instancedMesh.getMatrixAt(i, matrix);
         matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
 
-        if (dummy.scale.x < 2) {
-          dummy.scale.x += radiansPerSecond * delta;
-          dummy.scale.y += radiansPerSecond * delta;
-          dummy.scale.z += radiansPerSecond * delta;
+        if (dummy.scale.x < 100) {
+          dummy.position.y += t * .08;
+          dummy.scale.x += t * .01;
+          dummy.scale.y += t * .01;
+          dummy.scale.z += t * .01;
 
           dummy.updateMatrix();
           instancedMesh.setMatrixAt(i, dummy.matrix);
         }
       }
-      instancedMesh.instanceMatrix.needsUpdate = true;
+      instancedMesh.instanceMatrix.needsUpdate = true;*/
 
-      // const time = Date.now() * 0.002;
       // const sizes = edgeGeometry.attributes.size.array;
       // for (let i = 0; i < instancedMesh.count; i++) {
       //   sizes[i] = 0.01 * (1 + Math.sin(0.1 * i + delta));

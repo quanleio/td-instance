@@ -276,10 +276,7 @@ class Ray {
           const instanceId = intersects[0].instanceId;
           console.error("CLICK instanceId:", instanceId);
 
-          intersects[0].object.setColorAt(
-            instanceId,
-            color.setHex(Math.random() * 0xffffff)
-          );
+          intersects[0].object.setColorAt(instanceId,color.setHex(Math.random() * 0xffffff));
           intersects[0].object.instanceColor.needsUpdate = true;
           break;
       }

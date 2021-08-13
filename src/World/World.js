@@ -48,9 +48,9 @@ class World {
     // })
 
     // particle
-    // const particles = geometryShape.createParticles();
-    // scene.add(particles);
-    // loop.updatables.push(particles);
+    const particles = geometryShape.createParticles();
+    scene.add(particles);
+    loop.updatables.push(particles);
 
     const instancedShapes = geometryShape.instanceShapes();
     instancedShapes.forEach((shape) => {
@@ -65,18 +65,19 @@ class World {
     // })
 
     // Get data
-    axios.get("http://3.36.99.191/vz/first-data").then(data =>{
-
-      // make trees based on Turtle rules
-      const groupTree = new LindenmayerTree().makeGroupTree(data);
-      groupTree.forEach(tree => {
-        scene.add(tree)
-        loop.updatables.push(tree)
-      })
-    })
-    .catch(e => {
-      console.error(e);
-    });
+    // axios.get("http://3.36.99.191/vz/first-data").then(data =>{
+    //
+    //   // make trees based on Turtle rules
+    //   const groupTree = new LindenmayerTree().makeGroupTree(data);
+    //   groupTree.forEach(tree => {
+    //     scene.add(tree);
+    //     tree.children.forEach( t => loop.updatables.push(t))
+    //     // loop.updatables.push(tree)
+    //   })
+    // })
+    // .catch(e => {
+    //   console.error(e);
+    // });
 
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
@@ -131,10 +132,10 @@ class World {
     }, 1000)*/
 
     // Suzanne model
-    // loadSuzanne().then(_model => {
-    //   scene.add(_model);
-    //   loop.updatables.push(_model);
-    // });
+    loadSuzanne().then(_model => {
+      scene.add(_model);
+      loop.updatables.push(_model);
+    });
 
     // Sakura model
     // loadSakura().then(_model => {
