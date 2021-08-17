@@ -177,7 +177,7 @@ class World {
     controls.addEventListener("change", this.render);
 
     // ray
-    new Ray(scene, camera);
+    // new Ray(scene, camera);
 
     // resize
     new Resizer(camera, renderer , composer);

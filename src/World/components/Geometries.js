@@ -84,14 +84,22 @@ class Geometries {
     return particleSystem;
   }
 
+  /**
+   * Create bubbles using perlin noise.
+   * @returns {*}
+   */
   createBubbles() {
 
     let start = Date.now();
+    const matrix = new THREE.Matrix4();
+    let bubbleCount = 10;
+    let radius = 100;
+
     const bubbleMat = new THREE.ShaderMaterial( {
       uniforms: {
         tExplosion: {
           type: "t",
-          value: THREE.ImageUtils.loadTexture( './assets/yellow.png' )
+          value: new THREE.TextureLoader().load( './assets/yellow.png' )
         },
         time: { // float initialized to 0
           type: "f",
@@ -101,16 +109,61 @@ class Geometries {
       vertexShader: document.getElementById( 'vertexShader-bubble' ).textContent,
       fragmentShader: document.getElementById( 'fragmentShader-bubble' ).textContent
     });
+    // const material = new THREE.MeshStandardMaterial({
+    //   roughness: 0.4,
+    //   metalness: 0.1,
+    //   transparent: true,
+    //   opacity: 1
+    // });
 
-    const bubble = new THREE.Mesh(
-        new THREE.IcosahedronBufferGeometry(10, 32),
+    /*const bubble = new THREE.Mesh(
+        new THREE.IcosahedronBufferGeometry(10, 8),
         bubbleMat
     );
-    bubble.layers.enable(1)
+    bubble.layers.enable(1);
+    bubble.scale.setScalar(1/4);
+
+    let bubble_inst = new THREE.InstancedMesh(bubble.geometry, bubble.material, bubbleCount);
+    bubble_inst.type = "InstancedMesh";
+    bubble_inst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);*/
+
+    let bubbleGeo = new THREE.IcosahedronBufferGeometry(10/2, 8);
+    let bubble = new THREE.InstancedMesh(bubbleGeo, bubbleMat, bubbleCount);
+    bubble.type = "InstancedMesh";
+    bubble.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+    // Sphere
+    /*const sphereGeo = new THREE.SphereBufferGeometry(1.2, 32, 32);
+    let bubble = new THREE.InstancedMesh(
+        sphereGeo,
+        material,
+        bubbleCount
+    );
+    bubble.type = "InstancedMesh";
+    bubble.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+    bubble.castShadow = true;
+    bubble.receiveShadow = true;*/
+
+    for (let i = 0; i < bubbleCount; i++) {
+
+      const randomX = (Math.random() * 6 - 3) * radius;
+      const randomY = (Math.random() * 6 - 3) * window.innerHeight;
+      const randomZ = (Math.random() * 6 - 3) * radius;
+      matrix.setPosition(randomX, randomY, randomZ);
+      bubble.setMatrixAt(i, matrix);
+
+      // Enable bloom layers
+      bubble.layers.enable(1);
+    }
+    bubble.instanceMatrix.needsUpdate = true;
 
     bubble.tick = () => {
+
       // uniform update
-      bubbleMat.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
+      const time = performance.now();
+
+      bubbleMat.uniforms["time"].value = time * 0.0005/4;
+      // bubbleMat.uniforms[ 'time' ].value = .00005 * ( Date.now() - start );
     }
 
     return bubble
