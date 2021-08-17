@@ -164,7 +164,14 @@ function loadSuzanne() {
       (buffGeo) => {
         buffGeo.computeVertexNormals();
 
+
+        console.error(buffGeo)
+
         makeInstance(buffGeo).then((_instancedMesh) => {
+
+          // update buffGeo.attriubute.
+
+
           // this method will be called once per frame
           _instancedMesh.tick = (delta) => {
             var time = clock.getElapsedTime(); // elapsed time since last reset

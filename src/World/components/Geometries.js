@@ -1,15 +1,34 @@
 const radiansPerSecond = THREE.MathUtils.degToRad(30);
 
 class Geometries {
-  constructor() {}
+  constructor() {
+
+    this.randomColors = {
+      green: 0x5FBB88,      // 1
+      red : 0x771B56,       // 2
+      pink: 0xF9E5F6,       // 3
+      brown: 0x8E5032,      // 4
+      lightblue: 0x57AED7,  // 5
+      blue: 0x436FB3,       // 6
+      yellow: 0xE0BA4A,     // 7
+      white: 0xffffff       // 8
+    };
+    this.colorsLength = Object.keys(this.randomColors).length;
+
+  }
+
+  getRandomColor() {
+    var colIndx = Math.floor(Math.random()* this.colorsLength);
+    var colorStr = Object.keys(this.randomColors)[colIndx];
+    return this.randomColors[colorStr];
+  }
 
   /**
    * Create particles and make lines
    * @returns {*}
    */
   createParticles() {
-    const particleCount = 1200; // 1000;
-    const radius = 20; //10;
+    const particleCount = 1000;
     const positions = [];
     const colors = [];
     const sizes = [];
@@ -35,31 +54,24 @@ class Geometries {
     const geometry = new THREE.BufferGeometry();
     for (let i = 0; i < particleCount; i++) {
 
-      const randomX = (Math.random() * 6 - 3) * radius;
-      const randomY = (Math.random() * 6 - 3) * radius;
-      const randomZ = (Math.random() * 6 - 3) * radius;
+      const randomX = (Math.random() * 6 - 3) * 100;
+      const randomY = (Math.random() * 6 - 3) * window.innerHeight;
+      const randomZ = (Math.random() * 6 - 3) * 100;
       positions.push(randomX);
       positions.push(randomY);
       positions.push(randomZ);
 
       points.push(new THREE.Vector3(randomX, randomY, randomZ));
 
-      color.setHSL(i / particleCount, 1.0, 0.5);
+      let color = new THREE.Color().setHex(this.getRandomColor())
+      // color.setHSL(i / particleCount, 1.0, 0.5);
       colors.push(color.r, color.g, color.b);
-      sizes.push(20);
+      sizes.push(200);
     }
 
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(positions, 3)
-    );
+    geometry.setAttribute( "position", new THREE.Float32BufferAttribute(positions, 3) );
     geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-    geometry.setAttribute(
-      "size",
-      new THREE.Float32BufferAttribute(sizes, 1).setUsage(
-        THREE.DynamicDrawUsage
-      )
-    );
+    geometry.setAttribute( "size", new THREE.Float32BufferAttribute(sizes, 1).setUsage( THREE.DynamicDrawUsage ) );
     let particleSystem = new THREE.Points(geometry, shaderMaterial);
     particleSystem.sortParticles = true;
 
@@ -72,11 +84,16 @@ class Geometries {
     particleSystem.layers.enable(0);
 
     particleSystem.tick = (delta) => {
-      const time = Date.now() * 0.002;
+
+      // const time = performance.now();
+      // bubbleMat.uniforms["time"].value = time * 0.0005/4;
+
+      const time = Date.now() * 0.0005;
 
       const sizes = geometry.attributes.size.array;
       for (let i = 0; i < particleCount; i++) {
-        sizes[i] = 2 * (1 + Math.sin(0.1 * i + time));
+        // sizes[i] = 2 * (1 + Math.sin(0.1 * i + time));
+        sizes[i] = 200 * (1 + Math.sin(.1 * i + time));
       }
       geometry.attributes.size.needsUpdate = true;
     };
@@ -94,13 +111,18 @@ class Geometries {
     const matrix = new THREE.Matrix4();
     let bubbleCount = 10;
     let radius = 100;
+    const colors = [];
+    const bubbleArr = [];
+    const clock = new THREE.Clock();
 
     const bubbleMat = new THREE.ShaderMaterial( {
       uniforms: {
-        tExplosion: {
-          type: "t",
-          value: new THREE.TextureLoader().load( './assets/yellow.png' )
-        },
+        u_time: { value: 0.0 },
+        u_color: { value: new THREE.Color().setHex(0xE0BA4A) },
+        // tExplosion: {
+        //   type: "t",
+        //   value: new THREE.TextureLoader().load( './assets/spark1.png' )
+        // },
         time: { // float initialized to 0
           type: "f",
           value: 0.0
@@ -109,40 +131,11 @@ class Geometries {
       vertexShader: document.getElementById( 'vertexShader-bubble' ).textContent,
       fragmentShader: document.getElementById( 'fragmentShader-bubble' ).textContent
     });
-    // const material = new THREE.MeshStandardMaterial({
-    //   roughness: 0.4,
-    //   metalness: 0.1,
-    //   transparent: true,
-    //   opacity: 1
-    // });
 
-    /*const bubble = new THREE.Mesh(
-        new THREE.IcosahedronBufferGeometry(10, 8),
-        bubbleMat
-    );
-    bubble.layers.enable(1);
-    bubble.scale.setScalar(1/4);
-
-    let bubble_inst = new THREE.InstancedMesh(bubble.geometry, bubble.material, bubbleCount);
-    bubble_inst.type = "InstancedMesh";
-    bubble_inst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);*/
-
-    let bubbleGeo = new THREE.IcosahedronBufferGeometry(10/2, 8);
+    /*let bubbleGeo = new THREE.IcosahedronBufferGeometry(10/2, 8);
     let bubble = new THREE.InstancedMesh(bubbleGeo, bubbleMat, bubbleCount);
     bubble.type = "InstancedMesh";
     bubble.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-
-    // Sphere
-    /*const sphereGeo = new THREE.SphereBufferGeometry(1.2, 32, 32);
-    let bubble = new THREE.InstancedMesh(
-        sphereGeo,
-        material,
-        bubbleCount
-    );
-    bubble.type = "InstancedMesh";
-    bubble.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-    bubble.castShadow = true;
-    bubble.receiveShadow = true;*/
 
     for (let i = 0; i < bubbleCount; i++) {
 
@@ -155,18 +148,60 @@ class Geometries {
       // Enable bloom layers
       bubble.layers.enable(1);
     }
-    bubble.instanceMatrix.needsUpdate = true;
+    bubble.instanceMatrix.needsUpdate = true;*/
 
-    bubble.tick = () => {
+    for(let i=0; i<1000; i++) {
+      let bubbleGeo = new THREE.IcosahedronBufferGeometry(10, 8);
+      let bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
+      bubble.name = 'bubble';
+      // bubble.layers.enable(1);
 
-      // uniform update
-      const time = performance.now();
+      const randomX = (Math.random() * 6 - 3) * radius;
+      const randomY = (Math.random() * 6 - 3) * window.innerHeight;
+      const randomZ = (Math.random() * 6 - 3) * radius;
+      bubble.position.set(randomX, randomY, randomZ)
+      bubbleArr.push(bubble);
 
-      bubbleMat.uniforms["time"].value = time * 0.0005/4;
-      // bubbleMat.uniforms[ 'time' ].value = .00005 * ( Date.now() - start );
+      // let color = new THREE.Color().setHex(this.getRandomColor());
+      // console.log(color);
+
+      /*bubble.tick = (delta) => {
+
+        // const time = performance.now();
+        const time = Date.now() * 0.0005;
+
+        // bubbleMat.uniforms["time"].value = time * 0.0005;
+        bubbleMat.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
+
+        // update time uniform
+        // bubbleMat.uniforms[ 'u_time' ].value = clock.getElapsedTime();
+        bubbleMat.uniforms[ 'u_color' ].value = new THREE.Color().setHex(this.getRandomColor());
+
+        //bubbleArr.forEach(bubble => {
+          // console.warn(bubble.material.defaultAttributeValues.color)
+          // bubble.material.defaultAttributeValues.color = new THREE.Color().setHex(this.getRandomColor());
+        //})
+      }*/
     }
 
-    return bubble
+    let delta = 0;
+    let interval = 1 / 30;
+    bubbleArr.tick = () => {
+      // const time = performance.now();
+      const time = Date.now() * 0.0005;
+
+      delta += clock.getDelta();
+
+        // bubbleMat.uniforms["time"].value = time * 0.0005;
+        bubbleMat.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
+
+        // update time uniform
+        bubbleMat.uniforms[ 'u_time' ].value = clock.getElapsedTime();
+        bubbleMat.uniforms[ 'u_color' ].value = new THREE.Color().setHex(this.getRandomColor());
+
+    }
+
+    return bubbleArr;
   }
 
   /**

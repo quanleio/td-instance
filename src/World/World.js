@@ -54,7 +54,10 @@ class World {
 
     // bubbles
     const bubbles = geometryShape.createBubbles();
-    scene.add(bubbles);
+    bubbles.forEach(bubble => {
+      scene.add(bubble);
+      //loop.updatables.push(bubble);
+    })
     loop.updatables.push(bubbles);
 
     // const instancedShapes = geometryShape.instanceShapes();

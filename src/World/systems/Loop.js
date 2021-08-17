@@ -21,7 +21,7 @@ class Loop {
 
       // render the entire scene, then render bloom scene on top
       this.sceneComposer.render();
-    });
+    } );
   }
 
   stop() {
