@@ -52,6 +52,11 @@ class World {
     // scene.add(particles);
     // loop.updatables.push(particles);
 
+    // bubbles
+    const bubbles = geometryShape.createBubbles();
+    scene.add(bubbles);
+    loop.updatables.push(bubbles);
+
     // const instancedShapes = geometryShape.instanceShapes();
     // instancedShapes.forEach((shape) => {
     //   scene.add(shape);
@@ -65,19 +70,19 @@ class World {
     // })
 
     // Get data
-    axios.get("http://3.36.99.191/vz/first-data").then(data =>{
-
-      // make trees based on Turtle rules
-      const groupTree = new LindenmayerTree().makeGroupTree(data);
-      groupTree.forEach(tree => {
-        scene.add(tree);
-        tree.children.forEach( t => loop.updatables.push(t))
-        // loop.updatables.push(tree)
-      })
-    })
-    .catch(e => {
-      console.error(e);
-    });
+    // axios.get("http://3.36.99.191/vz/first-data").then(data =>{
+    //
+    //   // make trees based on Turtle rules
+    //   const groupTree = new LindenmayerTree().makeGroupTree(data);
+    //   groupTree.forEach(tree => {
+    //     scene.add(tree);
+    //     tree.children.forEach( t => loop.updatables.push(t))
+    //     // loop.updatables.push(tree)
+    //   })
+    // })
+    // .catch(e => {
+    //   console.error(e);
+    // });
 
     // tree from td json
     // new ProceduralTree().makeTree().then( branch => {
@@ -144,8 +149,8 @@ class World {
 
     // Robot
     // loadRobot().then(robot => {
-    //   console.warn(robot)
     //   scene.add(robot);
+    //   loop.updatables.push(robot);
     // })
 
     console.error(scene);

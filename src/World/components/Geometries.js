@@ -84,6 +84,38 @@ class Geometries {
     return particleSystem;
   }
 
+  createBubbles() {
+
+    let start = Date.now();
+    const bubbleMat = new THREE.ShaderMaterial( {
+      uniforms: {
+        tExplosion: {
+          type: "t",
+          value: THREE.ImageUtils.loadTexture( './assets/yellow.png' )
+        },
+        time: { // float initialized to 0
+          type: "f",
+          value: 0.0
+        },
+      },
+      vertexShader: document.getElementById( 'vertexShader-bubble' ).textContent,
+      fragmentShader: document.getElementById( 'fragmentShader-bubble' ).textContent
+    });
+
+    const bubble = new THREE.Mesh(
+        new THREE.IcosahedronBufferGeometry(10, 32),
+        bubbleMat
+    );
+    bubble.layers.enable(1)
+
+    bubble.tick = () => {
+      // uniform update
+      bubbleMat.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
+    }
+
+    return bubble
+  }
+
   /**
    * Generate position for each Instaned Mesh and makes lines
    * @returns {*}

@@ -17,7 +17,7 @@ function getRandomColor() {
 }
 
 const radiansPerSecond = THREE.MathUtils.degToRad(30);
-const texture = new THREE.TextureLoader().load('assets/circle.png');
+const texture = new THREE.TextureLoader().load('assets/bubble.png');
 function vertexShader() {
   return `
     precision highp float;
@@ -70,34 +70,33 @@ function fragmentShader() {
   `;
 }
 const clock = new THREE.Clock();
-const dummy = new THREE.Object3D();
-const matrix = new THREE.Matrix4();
 
 function loadRobot() {
+
+  const matrix = new THREE.Matrix4();
+  const dummy = new THREE.Object3D();
+  const count = 1000;
+
   return new Promise(resolve => {
     let gltfLoader = new THREE.GLTFLoader();
-    const count = 1000;
-
     gltfLoader.load( 'assets/Flower.glb' , function(gltf) {
 
-      const _stemMesh = gltf.scene.getObjectByName( 'Stem' );
-      const _blossomMesh = gltf.scene.getObjectByName( 'Blossom' );
+      gltf.scene.scale.setScalar(50);
+      console.error(gltf.scene)
 
-      const stemGeometry = _stemMesh.geometry.clone();
-      const blossomGeometry = _blossomMesh.geometry.clone();
+      const _blossomMesh = gltf.scene.getObjectByName( 'Blossom' ); // child1
+      const blossomGeometry = _blossomMesh.geometry.clone(); // child2
 
       const defaultTransform = new THREE.Matrix4()
       .makeRotationX( Math.PI )
       .multiply( new THREE.Matrix4().makeScale( 7, 7, 7 ) );
 
-      stemGeometry.applyMatrix4( defaultTransform );
       blossomGeometry.applyMatrix4( defaultTransform );
 
-      const stemMaterial = _stemMesh.material;
       const blossomMaterial = _blossomMesh.material;
 
-      const stemMesh = new THREE.InstancedMesh( stemGeometry, stemMaterial, count );
-      const blossomMesh = new THREE.InstancedMesh( blossomGeometry, blossomMaterial, count );
+      const blossomMesh = new THREE.InstancedMesh( blossomGeometry, blossomMaterial, 1000 );
+      blossomMesh.name = 'blossomMesh'
 
       // Assign random colors to the blossoms.
       const color = new THREE.Color();
@@ -108,19 +107,51 @@ function loadRobot() {
         color.setHex( blossomPalette[ Math.floor( Math.random() * blossomPalette.length ) ] );
         blossomMesh.setColorAt( i, color );
 
+        const randomX = (Math.random() * 5 - 5 / 2) * 40;
+        const randomY = (Math.random() * 2 - 1) * 40;
+        const randomZ = (Math.random() * 4 - 2) * 20;
+        matrix.setPosition(randomX, randomY, randomZ);
+        blossomMesh.setMatrixAt(i, matrix);
+
       }
 
-      // Instance matrices will be updated every frame.
-      stemMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
       blossomMesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
 
-      // resolve(gltf.scene);
-      resolve(stemMesh)
+      blossomMesh.tick = () => {
 
+
+      }
+
+      resolve(blossomMesh);
     });
+
+    gltfLoader.load( 'assets/RobotExpressive.glb' , function(gltf) {
+
+      gltf.scene.traverse( function ( child ) {
+        if ( child.isMesh ) {
+          console.error(child)
+          var instancedMesh = new THREE.InstancedMesh( child.geometry, child.material, 1 );
+
+          for ( let i = 0; i < count; i ++ ) {
+
+            const randomX = (Math.random() * 5 - 5 / 2) * 40;
+            const randomY = (Math.random() * 2 - 1) * 40;
+            const randomZ = (Math.random() * 4 - 2) * 20;
+            matrix.setPosition(randomX, randomY, randomZ);
+            instancedMesh.setMatrixAt(i, matrix);
+
+          }
+
+          instancedMesh.tick = () => {}
+
+          resolve(instancedMesh);
+
+        }
+      } );
+    });
+
   })
 }
-
 
 /**
  * Load BufferGeometry to make mesh.
