@@ -117,12 +117,12 @@ class Geometries {
 
     const bubbleMat = new THREE.ShaderMaterial( {
       uniforms: {
-        u_time: { value: 0.0 },
-        u_color: { value: new THREE.Color().setHex(0xE0BA4A) },
-        // tExplosion: {
-        //   type: "t",
-        //   value: new THREE.TextureLoader().load( './assets/spark1.png' )
-        // },
+        // u_time: { value: 0.0 },
+        // u_color: { value: new THREE.Color().setHex(0xE0BA4A) },
+        pointTexture: {
+          type: "t",
+          value: new THREE.TextureLoader().load( './assets/green.png' )
+        },
         time: { // float initialized to 0
           type: "f",
           value: 0.0
@@ -151,7 +151,7 @@ class Geometries {
     bubble.instanceMatrix.needsUpdate = true;*/
 
     for(let i=0; i<1000; i++) {
-      let bubbleGeo = new THREE.IcosahedronBufferGeometry(10, 8);
+      let bubbleGeo = new THREE.SphereBufferGeometry(20, 32, 16);
       let bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
       bubble.name = 'bubble';
       // bubble.layers.enable(1);
@@ -196,8 +196,8 @@ class Geometries {
         bubbleMat.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
 
         // update time uniform
-        bubbleMat.uniforms[ 'u_time' ].value = clock.getElapsedTime();
-        bubbleMat.uniforms[ 'u_color' ].value = new THREE.Color().setHex(this.getRandomColor());
+        // bubbleMat.uniforms[ 'u_time' ].value = clock.getElapsedTime();
+        // bubbleMat.uniforms[ 'u_color' ].value = new THREE.Color().setHex(this.getRandomColor());
 
     }
 
